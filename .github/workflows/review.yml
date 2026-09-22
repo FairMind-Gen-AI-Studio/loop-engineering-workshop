@@ -8,8 +8,10 @@
 #   never on a branch. A review that finishes in about fifteen seconds did not run.
 # - Never make this a required check. The required check is CI's `tests`.
 #
-# Credential: a secret named CLAUDE_CODE_OAUTH_TOKEN, generated with
-# `claude setup-token` on your own subscription. See README.
+# Credential, either one (see README):
+# - ANTHROPIC_API_KEY, an Anthropic API key, billed as API usage; or
+# - CLAUDE_CODE_OAUTH_TOKEN, from `claude setup-token`, billed to a Claude subscription.
+# With both set, the API key is used.
 
 name: Claude review
 
@@ -41,16 +43,20 @@ jobs:
 
       # The action does not fail without a credential: it exits green having
       # posted nothing. Fail here instead, printing only the length.
-      - name: Assert the review credential is present
+      - name: Assert a review credential is present
         env:
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           set -eu
-          if [ -z "${TOKEN:-}" ]; then
-            echo "::error::CLAUDE_CODE_OAUTH_TOKEN is not set. Run 'claude setup-token' and add it as a repository secret." >&2
+          if [ -n "${API_KEY:-}" ]; then
+            echo "using ANTHROPIC_API_KEY (length ${#API_KEY})"
+          elif [ -n "${TOKEN:-}" ]; then
+            echo "using CLAUDE_CODE_OAUTH_TOKEN (length ${#TOKEN})"
+          else
+            echo "::error::No review credential. Set ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN as a repository secret (see README)." >&2
             exit 1
           fi
-          echo "credential present (length ${#TOKEN})"
 
       # A push to a reviewed PR must be reviewed again, and must fire the label
       # event again: take the label off before the new review starts.
@@ -68,6 +74,7 @@ jobs:
       - uses: anthropics/claude-code-action@9d7150bc8a3dae8149739a88019d192b579ad90c # v1
         id: review
         with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
