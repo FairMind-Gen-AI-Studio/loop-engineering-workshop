@@ -4,7 +4,11 @@
     ./workshop doctor          check the tools, the plugin and the review secret
     ./workshop setup           labels, CODEOWNERS and the main ruleset on your copy
     ./workshop reset <ex>      start an exercise from a clean branch
+    ./workshop events <file>   what a headless run did, pass by pass (exercise 1)
+    ./workshop hook            log every tool call to tool-log.txt (exercise 1)
     ./workshop deploy [args]   write the fake production log for exercise 2
+
+On Windows, type `py workshop` where this says `./workshop`.
 
 Exercises you can reset to: ex1, ex2, ex3-goal, ex3-loop, ex4, ex5. The starting
 branches are fetched from the public template, so they work in a copy made
@@ -31,7 +35,7 @@ EXERCISES = {
     "ex5": "main",
 }
 # Files an exercise writes that a reset must not carry into the next one.
-SCRATCH = [".fairmind/active-context.json", "deploy.log", "run.jsonl", "tool-log.txt"]
+SCRATCH = [".fairmind/active-context.json", ".claude/settings.local.json", "deploy.log", "run.jsonl", "tool-log.txt"]
 LABELS = {
     "reviewed": ("0E8A16", "The Claude review has run on the latest push"),
     "defect": ("D73A4A", "Found while using our own tools"),
@@ -57,8 +61,8 @@ def ok(label, passed, hint=""):
 def doctor():
     print("tools")
     results = []
-    for tool, hint in [("git", "install git"), ("gh", "https://cli.github.com"),
-                       ("jq", "brew install jq / apt install jq"), ("claude", "https://claude.com/claude-code")]:
+    for tool, hint in [("git", "install git (on Windows: Git for Windows, which brings Git Bash)"), ("gh", "https://cli.github.com"),
+                       ("jq", "brew install jq / apt install jq / winget install jqlang.jq"), ("claude", "https://claude.com/claude-code")]:
         results.append(ok(tool, shutil.which(tool) is not None, hint))
     results.append(ok(f"python {sys.version.split()[0]}", sys.version_info >= (3, 10), "python 3.10 or later"))
     try:
@@ -85,6 +89,26 @@ def doctor():
     results.append(ok("fairmind-coding plugin", has_plugin,
                       "in Claude Code: /plugin marketplace add FairMind-Gen-AI-Studio/fairmind-plugins-public, "
                       "then /plugin install fairmind-coding@fairmind-plugins"))
+
+    # Claude Code ignores this repository's .claude/settings.json (the commands the
+    # exercises pre-approve) until you have opened `claude` here once and trusted it.
+    try:
+        projects = json.loads((pathlib.Path.home() / ".claude.json").read_text()).get("projects", {})
+    except (OSError, ValueError):
+        projects = {}
+    # Trusting a folder also trusts everything inside it.
+    trusted = any(projects.get(key, {}).get("hasTrustDialogAccepted")
+                  for folder in (ROOT, *ROOT.parents) for key in {str(folder), folder.as_posix()})
+    results.append(ok("this folder is trusted", trusted,
+                      "run `claude` here once, accept the trust question, then /exit"))
+
+    if os.name == "nt":
+        # The fairmind-coding loop gate (exercise 3, run 2) calls `python3` from Git
+        # Bash; a python.org or winget Python only answers to `python` and `py`.
+        bash = shutil.which("bash")
+        found = bool(bash) and run(bash, "-lc", "python3 --version", check=False).returncode == 0
+        results.append(ok("python3 inside Git Bash (exercise 3, run 2)", found,
+                          "not tested on Windows yet: do exercise 3 run 2 with someone on macOS or Linux"))
 
     print("\nready" if all(results) else "\nfix the ✗ lines above, then run ./workshop doctor again")
     return 0 if all(results) else 1
@@ -155,6 +179,69 @@ def reset(exercise):
     return 0
 
 
+def read_events(path):
+    # Windows PowerShell 5.1 writes `>` redirections as UTF-16, so honour a BOM.
+    raw = pathlib.Path(path).read_bytes()
+    encoding = "utf-16" if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else "utf-8-sig"
+    events = []
+    for line in raw.decode(encoding).splitlines():
+        line = line.strip()
+        if line.startswith("{"):
+            events.append(json.loads(line))
+    return events
+
+
+def events(path):
+    try:
+        stream = read_events(path)
+    except OSError as err:
+        sys.exit(f"cannot read {path}: {err.strerror}. Run step 1 of exercise 1 first.")
+    passes, tools, last_text = 0, [], ""
+    for event in stream:
+        if event.get("type") != "assistant":
+            continue
+        passes += 1
+        content = event.get("message", {}).get("content", [])
+        calls = [block for block in content if block.get("type") == "tool_use"]
+        tools.extend(call["name"] for call in calls)
+        text = " ".join(block.get("text", "") for block in content if block.get("type") == "text").strip()
+        if text and not calls:
+            last_text = text
+    result = next((event for event in reversed(stream) if event.get("type") == "result"), {})
+
+    print(f"tool calls, in order ({len(tools)}):")
+    for number, name in enumerate(tools, 1):
+        print(f"  {number:>3}  {name}")
+    print(f"assistant messages: {passes}")
+    print(f"turns reported by the run: {result.get('num_turns', '?')}")
+    print("\nthe message that ended the turn (no tool call):")
+    print("  " + (last_text[:600] or "(none found)").replace("\n", "\n  "))
+    return 0
+
+
+def hook():
+    # The interpreter running this script, by absolute path, so the hook works on
+    # every OS without jq. Forward slashes work in Git Bash, which README requires
+    # on Windows, as well as everywhere else.
+    command = f'"{pathlib.Path(sys.executable).as_posix()}" "{(ROOT / "workshop").as_posix()}" log-tool'
+    settings = {"hooks": {"PostToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": command}]}]}}
+    target = ROOT / ".claude" / "settings.local.json"
+    target.parent.mkdir(exist_ok=True)
+    target.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {target.relative_to(ROOT).as_posix()} (not committed; ./workshop reset removes it):\n")
+    print(target.read_text(encoding="utf-8"))
+    return 0
+
+
+def log_tool():
+    # Called by the hook: the event arrives as JSON on stdin.
+    event = json.loads(sys.stdin.buffer.read().decode("utf-8") or "{}")
+    with open(ROOT / "tool-log.txt", "a", encoding="utf-8") as log:
+        failed = event.get("hook_event_name") == "PostToolUseFailure"
+        print(event.get("tool_name", "?") + (" FAILED" if failed else ""), file=log)
+    return 0
+
+
 def deploy(args):
     return subprocess.call([sys.executable, str(ROOT / "scripts" / "fake_deploy.py"), *args], cwd=ROOT)
 
@@ -170,6 +257,12 @@ def main(argv):
         return setup()
     if command == "reset" and len(rest) == 1:
         return reset(rest[0])
+    if command == "events" and len(rest) == 1:
+        return events(rest[0])
+    if command == "hook":
+        return hook()
+    if command == "log-tool":
+        return log_tool()
     if command == "deploy":
         return deploy(rest)
     print(__doc__)
@@ -177,5 +270,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    # ✓ and ✗ must survive a Windows console or a redirected stdout.
+    sys.stdout.reconfigure(encoding="utf-8")
     os.chdir(ROOT)
     sys.exit(main(sys.argv[1:]))
