@@ -31,6 +31,11 @@ Amounts are integer cents; `python3 -m shop` prints a receipt.
 where they say `python3`. Everything else is the same: the prompts you paste into
 Claude Code, `git`, `gh` and `claude` do not change.
 
+**Not yet tested on Windows: exercise 3, run 2.** The `fairmind-coding` plugin runs
+its loop gate as `python3` inside Git Bash, and a Python installed from python.org or
+with `winget` is called `python` and `py` there, not `python3`. `./workshop doctor`
+checks it on Windows. If it shows ✗, do run 2 alongside someone on macOS or Linux.
+
 ## Before the workshop · 20 minutes
 
 Do this the day before. `./workshop doctor`, at the end, checks the tools, the plugin and
@@ -64,7 +69,7 @@ the review secret; the GitHub App it cannot see, so check that one by hand.
 3. **Trust your copy.** In the folder of your copy, run `claude` once, answer **yes**
    to the question about trusting the folder, then type `/exit`. Until you do, Claude
    Code ignores `.claude/settings.json`, which pre-approves the test and `git`/`gh`
-   commands the exercises run.
+   commands the exercises run, and `/goal` (exercise 3) is not available.
 4. **Install the plugin** (exercise 3). Inside Claude Code:
 
    ```
@@ -116,7 +121,7 @@ your own `main`, so the pull requests you open go to your copy.
 | `.github/workflows/review.yml` | Claude reviews every pull request, then labels it `reviewed` |
 | `.github/ISSUE_TEMPLATE/defect.yml` | a defect with a stable key and a Reproduce block |
 | `.github/CODEOWNERS`, `.github/rulesets/main.json` | the paths that stay human, and what GitHub enforces |
-| `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, `gh` |
+| `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
 | `.claude/skills/review-loop/` | the skill you write in exercise 4 |
 | `scripts/fake_deploy.py` | the fake production log for exercise 2 |
 | `workshop` | `doctor`, `setup`, `reset`, `events`, `hook`, `deploy` |

@@ -16,16 +16,11 @@ what each one accepted as done.
 claude
 ```
 
-Paste the goal. It is one condition, taken from `TICKET.md`:
+Paste the goal. It is one condition, taken from `TICKET.md`, and it starts the work
+straight away: the condition is also the instruction.
 
 ```text
-/goal discount codes work as TICKET.md describes and the test suite passes
-```
-
-Then give it the work:
-
-```text
-Read TICKET.md and implement it. Add tests for what it asks.
+/goal TICKET.md is implemented with tests for what it asks: discount codes work as TICKET.md describes and the test suite passes
 ```
 
 Claude keeps working until the goal's evaluator, a small model reading the

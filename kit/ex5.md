@@ -38,9 +38,10 @@ File it as a GitHub issue in this repository, following the Defect template in
 Show me the key and the full gh command, and wait for my OK before running it.
 ```
 
-**Then file one of them twice.** Your teammate opens a **new** session
-(`/exit`, then `claude`), pastes the same prompt, and describes the **same** defect in
-**different words**.
+**Then file one of them twice**, in the **same copy** of the repository: the search
+only sees the issues of the repository it runs in. Open a **second** session there
+(`/exit`, then `claude`, or a second terminal). Your teammate, at your keyboard,
+pastes the same prompt and describes the **same** defect in **different words**.
 
 **Expect:** the second filing finds the first issue and comments on it. If it opens a
 new issue instead, the key was written from the description, not from what broke:

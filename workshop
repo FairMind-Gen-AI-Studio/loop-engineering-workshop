@@ -102,6 +102,14 @@ def doctor():
     results.append(ok("this folder is trusted", trusted,
                       "run `claude` here once, accept the trust question, then /exit"))
 
+    if os.name == "nt":
+        # The fairmind-coding loop gate (exercise 3, run 2) calls `python3` from Git
+        # Bash; a python.org or winget Python only answers to `python` and `py`.
+        bash = shutil.which("bash")
+        found = bool(bash) and run(bash, "-lc", "python3 --version", check=False).returncode == 0
+        results.append(ok("python3 inside Git Bash (exercise 3, run 2)", found,
+                          "not tested on Windows yet: do exercise 3 run 2 with someone on macOS or Linux"))
+
     print("\nready" if all(results) else "\nfix the ✗ lines above, then run ./workshop doctor again")
     return 0 if all(results) else 1
 
@@ -213,7 +221,8 @@ def events(path):
 
 def hook():
     # The interpreter running this script, by absolute path, so the hook works on
-    # every OS without jq. Forward slashes, because on Windows hooks run in Git Bash.
+    # every OS without jq. Forward slashes work in Git Bash, which README requires
+    # on Windows, as well as everywhere else.
     command = f'"{pathlib.Path(sys.executable).as_posix()}" "{(ROOT / "workshop").as_posix()}" log-tool'
     settings = {"hooks": {"PostToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": command}]}]}}
     target = ROOT / ".claude" / "settings.local.json"
