@@ -1,0 +1,210 @@
+{
+  "schema": "fairmind-loop/1",
+  "target": {
+    "level": "task",
+    "ref": "DISC-1"
+  },
+  "status": "specified",
+  "hermeticity_tier": "B",
+  "confirmations": 0,
+  "budget": {
+    "max_iterations": 6,
+    "max_consecutive_failures": 3,
+    "timeout_min": 60,
+    "spent": {
+      "iterations": 0
+    }
+  },
+  "checks": [
+    {
+      "id": "ac1-percent-off",
+      "kind": "machine",
+      "type": "functional",
+      "owner": "software-engineer",
+      "source": {
+        "authored_by": "qa-engineer"
+      },
+      "exec": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 .fairmind/gate/test_ac1_percent_off.py",
+        "timeout_s": 60,
+        "network": "forbidden"
+      },
+      "signal": {
+        "from": "exit_code",
+        "value_type": "count",
+        "on_missing": "error"
+      },
+      "predicate": {
+        "operator": "==",
+        "value": 0
+      },
+      "determinism": {
+        "runs": 1,
+        "probe_k": 3,
+        "confirmation_k": 3
+      },
+      "admission": {
+        "status": "pending"
+      },
+      "consecutive_failures": 0
+    },
+    {
+      "id": "ac2-case-insensitive",
+      "kind": "machine",
+      "type": "functional",
+      "owner": "software-engineer",
+      "source": {
+        "authored_by": "qa-engineer"
+      },
+      "exec": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 .fairmind/gate/test_ac2_case_insensitive.py",
+        "timeout_s": 60,
+        "network": "forbidden"
+      },
+      "signal": {
+        "from": "exit_code",
+        "value_type": "count",
+        "on_missing": "error"
+      },
+      "predicate": {
+        "operator": "==",
+        "value": 0
+      },
+      "determinism": {
+        "runs": 1,
+        "probe_k": 3,
+        "confirmation_k": 3
+      },
+      "admission": {
+        "status": "pending"
+      },
+      "consecutive_failures": 0
+    },
+    {
+      "id": "ac3-unknown-code",
+      "kind": "machine",
+      "type": "functional",
+      "owner": "software-engineer",
+      "source": {
+        "authored_by": "qa-engineer"
+      },
+      "exec": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 .fairmind/gate/test_ac3_unknown_code.py",
+        "timeout_s": 60,
+        "network": "forbidden"
+      },
+      "signal": {
+        "from": "exit_code",
+        "value_type": "count",
+        "on_missing": "error"
+      },
+      "predicate": {
+        "operator": "==",
+        "value": 0
+      },
+      "determinism": {
+        "runs": 1,
+        "probe_k": 3,
+        "confirmation_k": 3
+      },
+      "admission": {
+        "status": "pending"
+      },
+      "consecutive_failures": 0
+    },
+    {
+      "id": "ac4-free-keeps-shipping",
+      "kind": "machine",
+      "type": "functional",
+      "owner": "software-engineer",
+      "source": {
+        "authored_by": "qa-engineer"
+      },
+      "exec": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 .fairmind/gate/test_ac4_free_keeps_shipping.py",
+        "timeout_s": 60,
+        "network": "forbidden"
+      },
+      "signal": {
+        "from": "exit_code",
+        "value_type": "count",
+        "on_missing": "error"
+      },
+      "predicate": {
+        "operator": "==",
+        "value": 0
+      },
+      "determinism": {
+        "runs": 1,
+        "probe_k": 3,
+        "confirmation_k": 3
+      },
+      "admission": {
+        "status": "pending"
+      },
+      "consecutive_failures": 0
+    },
+    {
+      "id": "module-exists",
+      "kind": "machine",
+      "type": "functional",
+      "owner": "software-engineer",
+      "source": {
+        "authored_by": "qa-engineer"
+      },
+      "exec": {
+        "command": "PYTHONDONTWRITEBYTECODE=1 python3 .fairmind/gate/test_pricing_module_exists.py",
+        "timeout_s": 60,
+        "network": "forbidden"
+      },
+      "signal": {
+        "from": "exit_code",
+        "value_type": "count",
+        "on_missing": "error"
+      },
+      "predicate": {
+        "operator": "==",
+        "value": 0
+      },
+      "determinism": {
+        "runs": 1,
+        "probe_k": 3,
+        "confirmation_k": 3
+      },
+      "admission": {
+        "status": "pending"
+      },
+      "consecutive_failures": 0
+    }
+  ],
+  "quarantine": [],
+  "iterations": [],
+  "contract": {
+    "criteria": [
+      {
+        "id": "AC1",
+        "text": "SAVE10 takes 10% off the items; VAT is computed on the discounted items.",
+        "disposition": "checked:ac1-percent-off",
+        "hard": true
+      },
+      {
+        "id": "AC2",
+        "text": "Discount codes are case-insensitive.",
+        "disposition": "checked:ac2-case-insensitive",
+        "hard": true
+      },
+      {
+        "id": "AC3",
+        "text": "An unknown code is refused with ValueError.",
+        "disposition": "checked:ac3-unknown-code",
+        "hard": true
+      },
+      {
+        "id": "AC4",
+        "text": "FREE100 makes the items free; shipping is still charged.",
+        "disposition": "checked:ac4-free-keeps-shipping",
+        "hard": true
+      }
+    ]
+  }
+}
