@@ -111,6 +111,34 @@ cp -R "$SOL/ex4/." "$work/ex4/"
 tests_pass "$work/ex4" || fail "exercise 4 solution is red"
 pass "exercise 4 solution green"
 
+echo "workshop events, hook and log-tool (exercise 1)"
+helpers="$work/helpers"
+clone main "$helpers"
+cat >"$helpers/run.jsonl" <<'JSONL'
+{"type":"system","subtype":"init"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Reading."},{"type":"tool_use","name":"Read","input":{}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Edit","input":{}}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Done: receipts show two decimals."}]}}
+{"type":"result","num_turns":3}
+JSONL
+(cd "$helpers" && python3 workshop events run.jsonl >"$work/events.out") || fail "events errored"
+grep -q "1  Read" "$work/events.out" && grep -q "2  Edit" "$work/events.out" \
+  && grep -q "turns reported by the run: 3" "$work/events.out" && grep -q "Done: receipts" "$work/events.out" \
+  || fail "events misread the stream: $(cat "$work/events.out")"
+python3 -c 'import sys; open(sys.argv[2], "wb").write(open(sys.argv[1], encoding="utf-8").read().encode("utf-16"))' \
+  "$helpers/run.jsonl" "$work/run16.jsonl"
+(cd "$helpers" && python3 workshop events "$work/run16.jsonl") | cmp -s - "$work/events.out" \
+  || fail "events reads a UTF-16 log (Windows PowerShell 5.1 redirect) differently"
+pass "events: tool calls, turns and the last message, from UTF-8 and UTF-16 alike"
+(cd "$helpers" && python3 workshop hook >/dev/null) || fail "hook errored"
+command="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["hooks"]["PostToolUse"][0]["hooks"][0]["command"])' \
+  "$helpers/.claude/settings.local.json")" || fail "hook wrote no PostToolUse command"
+echo '{"tool_name":"Bash","hook_event_name":"PostToolUse"}' | (cd "$work" && bash -c "$command") || fail "the hook command errored"
+echo '{"tool_name":"Edit","hook_event_name":"PostToolUseFailure"}' | (cd "$work" && bash -c "$command") || fail "the hook command errored"
+[ "$(cat "$helpers/tool-log.txt")" = "$(printf 'Bash\nEdit FAILED')" ] || fail "tool-log.txt: $(cat "$helpers/tool-log.txt")"
+git -C "$helpers" status --porcelain | grep -q . && fail "hook or events left a file git would commit"
+pass "hook: the command it writes logs successes and failures from any directory, and nothing is left to commit"
+
 echo "workshop reset, in a copy made from the template"
 origin="$work/copy-origin.git"; copy="$work/copy"
 git init -q --bare -b main "$origin"
@@ -123,9 +151,16 @@ for ex in ex2 ex3-loop ex4; do
   (cd "$copy" && WORKSHOP_UPSTREAM="$ROOT" ./workshop reset "$ex" </dev/null >/dev/null 2>"$work/reset.err") \
     || fail "reset $ex failed in a template copy: $(cat "$work/reset.err")"
   git -C "$copy" merge-base --is-ancestor origin/main HEAD || fail "reset $ex is not built on the copy's main"
+  # A starting branch built from an older main replays that main's files over the
+  # copy's: rebuild the branches after every change to main, or reset undoes it.
+  git -C "$copy" diff --quiet origin/main HEAD -- workshop README.md kit .claude/settings.json .gitattributes \
+    || fail "reset $ex rolls main's files back: rebuild the starting branches (tools/build_branches.py)"
 done
 grep -q FREE_SHIPPING_FROM "$copy/shop/pricing.py" || fail "reset ex4 did not bring the exercise 4 change"
 [ -e "$copy/.fairmind" ] && fail "the exercise 3 contract leaked into exercise 4"
-pass "reset builds ex2, ex3-loop, ex4 on the copy's own main, and nothing leaks between them"
+(cd "$copy" && python3 workshop hook >/dev/null && WORKSHOP_UPSTREAM="$ROOT" ./workshop reset ex2 </dev/null >/dev/null 2>&1) \
+  || fail "reset after hook failed"
+[ -e "$copy/.claude/settings.local.json" ] && fail "reset kept the exercise 1 hook"
+pass "reset builds ex2, ex3-loop, ex4 on the copy's own main, keeps main's files, and nothing leaks between them"
 
 echo "ALL VERIFIED"

@@ -27,9 +27,21 @@ git push --force origin ex2-start ex3-goal-start ex3-loop-start ex4-start
 
 Overlays store `.fairmind/` as `_fairmind/`; the build renames it.
 
+**Rebuild and force-push the starting branches in the same sitting as every change to
+`main`.** `reset` replays the template's `main`→starting-branch diff on the
+participant's copy, so a starting branch built from an older `main` carries the
+inverse of every newer change: `reset ex2` would bring back the old handouts and the
+old `workshop`. `verify.sh` fails on exactly that ("rolls main's files back").
+
 ## What each exercise is built to show
 
 - **Ex 1.** The receipt prints `24.5 EUR`. Any fix works; the point is the event log.
+  `workshop events` reads it (UTF-16 too, for a PowerShell 5.1 redirect), and `workshop
+  hook` writes the `PostToolUse` hook into the gitignored `.claude/settings.local.json`,
+  calling `workshop log-tool` through the absolute interpreter path, with no jq. The
+  headless run needs the committed `.claude/settings.json` allow-list: without it
+  every test command is denied, and Claude Code ignores that file until the folder is
+  trusted, which README's setup and `doctor` cover.
 - **Ex 2.** `shop/tax.py` truncates instead of rounding half up: `test_vat_rounds_half_up`
   fails. CI waits 100 s in a step that says it checks nothing, so a `/loop` has
   something to wait for. `./workshop deploy` regresses at minute 7 for 3 minutes.
@@ -43,6 +55,14 @@ Overlays store `.fairmind/` as `_fairmind/`; the build renames it.
   cover neither; `solutions/ex4/tests/test_shipping.py` catches both.
 - **Ex 5.** No code. The discussion is the merge policy, and the solo-copy trap in
   `kit/ex5/merge-policy.md`: GitHub cannot tell a routine from its owner.
+
+## Windows
+
+Participants on Windows run natively: `py workshop …`, and Git for Windows, whose Git
+Bash Claude Code uses for its shell. Nothing here has been run on Windows yet. The
+known risk is exercise 3 run 2: the plugin's loop gate calls `python3` from Git Bash,
+and a python.org or `winget` Python answers only to `python` and `py`. `doctor`
+checks it on Windows. Before a room with Windows laptops, run the whole kit on one.
 
 ## API credits
 
