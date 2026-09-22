@@ -44,6 +44,15 @@ Overlays store `.fairmind/` as `_fairmind/`; the build renames it.
 - **Ex 5.** No code. The discussion is the merge policy, and the solo-copy trap in
   `kit/ex5/merge-policy.md`: GitHub cannot tell a routine from its owner.
 
+## API credits
+
+Participants on API credits need one key each, for two uses: Claude Code in their
+terminal (`export ANTHROPIC_API_KEY=…`) and the review in their copy (the repository
+secret `ANTHROPIC_API_KEY`). Issue one key per participant from a Console workspace
+with a spend limit, so one runaway loop cannot drain the room, and revoke the keys
+after the workshop: they sit in repository secrets you do not control. Routines do
+not run on an API key; those participants do exercise 5's routines by hand.
+
 ## Before each delivery
 
 1. Run `tools/verify.sh` against the **public** plugin participants will install.
