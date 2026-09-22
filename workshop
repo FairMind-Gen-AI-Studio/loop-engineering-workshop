@@ -21,7 +21,7 @@ import sys
 # WORKSHOP_UPSTREAM overrides the template location, for rehearsing offline.
 UPSTREAM = os.environ.get("WORKSHOP_UPSTREAM", "https://github.com/FairMind-Gen-AI-Studio/loop-engineering-workshop.git")
 PLUGIN_KEY = "fairmind-coding@fairmind-plugins"
-SECRET = "CLAUDE_CODE_OAUTH_TOKEN"
+SECRETS = ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN")  # either one
 EXERCISES = {
     "ex1": "main",
     "ex2": "ex2-start",
@@ -71,9 +71,10 @@ def doctor():
     authed = shutil.which("gh") and run("gh", "auth", "status", check=False).returncode == 0
     results.append(ok("gh is logged in", bool(authed), "gh auth login"))
     if authed:
-        secrets = run("gh", "secret", "list", check=False).stdout
-        results.append(ok(f"secret {SECRET}", SECRET in secrets,
-                          f"claude setup-token, then: gh secret set {SECRET}"))
+        listed = run("gh", "secret", "list", check=False).stdout.split()
+        present = [name for name in SECRETS if name in listed]
+        results.append(ok(f"review secret {present[0] if present else ''}".strip(), bool(present),
+                          "gh secret set ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN, see README)"))
 
     print("claude code")
     installed = pathlib.Path.home() / ".claude" / "plugins" / "installed_plugins.json"

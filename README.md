@@ -17,19 +17,25 @@ Amounts are integer cents; `python3 -m shop` prints a receipt.
 ## What you need
 
 - A **GitHub account**, and the rights to create a public repository in it.
-- A **Claude subscription** (Pro, Max, Team or Enterprise): the review runs on it
-  through `claude setup-token`, and routines (exercise 5) need it too.
+- **Access to Claude**, one of:
+  - an **Anthropic API key**, from the credits your facilitator gives you; or
+  - a **Claude subscription** (Pro, Max, Team or Enterprise).
+
+  Routines (`/schedule`, the optional part of exercise 5) need a subscription login;
+  with an API key only, you run the same prompts by hand, which the exercise expects.
 - macOS or Linux. On Windows, use WSL; the commands below assume a POSIX shell.
 
 ## Before the workshop · 20 minutes
 
-Do this the day before. Every step is checked by `./workshop doctor` at the end.
+Do this the day before. `./workshop doctor`, at the end, checks the tools, the plugin and
+the review secret; the GitHub App it cannot see, so check that one by hand.
 
 1. **Make your own copy.** On GitHub, **Use this template → Create a new repository**,
    in your own account. Make it **public**: branch rulesets, which exercise 5 uses,
    need a public repository or a paid plan. Your exercise work will be visible.
    Then clone your copy and `cd` into it.
-2. **Install the tools:** [Claude Code](https://claude.com/claude-code) (logged in),
+2. **Install the tools:** [Claude Code](https://claude.com/claude-code), logged in
+   with your subscription or started with `export ANTHROPIC_API_KEY=<your key>`;
    [GitHub CLI](https://cli.github.com) then `gh auth login`, `jq`, Python 3.10 or
    later, and `python3 -m pip install pytest`.
 3. **Install the plugin** (exercise 3). Inside Claude Code:
@@ -43,9 +49,11 @@ Do this the day before. Every step is checked by `./workshop doctor` at the end.
    your copy:
    - install the [Claude GitHub App](https://github.com/apps/claude) and give it
      access to your copy: the review posts through it;
-   - give the review its credential, generated on your own subscription:
+   - give the review its credential, **one** of:
 
      ```bash
+     gh secret set ANTHROPIC_API_KEY             # the API key; paste it when asked
+     # or, on a subscription:
      claude setup-token                          # prints a long-lived token
      gh secret set CLAUDE_CODE_OAUTH_TOKEN       # paste it when asked
      ```
@@ -92,7 +100,7 @@ your own `main`, so the pull requests you open go to your copy.
 | `./workshop doctor` shows ✗ | the line after the arrow says what to install or run |
 | `reset` says it could not start an exercise | your `main` has diverged from the template's; ask the facilitator |
 | the review check is green and nothing was posted | it ran for ~15 s: the workflow file differs from `main`'s, or the app is not installed on your copy |
-| the review check is red: credential not set | `gh secret set CLAUDE_CODE_OAUTH_TOKEN` on your copy |
+| the review check is red: no review credential | `gh secret set ANTHROPIC_API_KEY` on your copy (or the subscription token) |
 | `/fairmind-loop` asks about a Fairmind workspace | answer **no**: the loop runs without one |
 | `setup`: ruleset not created | your copy is private on a free plan; make it public |
 
