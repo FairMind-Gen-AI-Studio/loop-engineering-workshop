@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest *)",
+      "Bash(python3 -m pytest *)",
+      "Bash(py -m pytest *)",
+      "Bash(python -m shop *)",
+      "Bash(python3 -m shop *)",
+      "Bash(py -m shop *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(gh issue *)"
+    ]
+  }
+}
