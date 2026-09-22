@@ -91,9 +91,12 @@ for c in s["checks"]:
     assert r.returncode == 0, (c["id"], r.stdout[-400:], r.stderr[-400:])
 PY
 pass "exercise 3 solution: every admitted check green"
-python3 "$FM_SCRIPTS/run_gate_checks.py" --state "$state" --cwd "$repo" >"$work/green.log" 2>&1 \
-  || fail "the gate is not green on the solution: $(tail -5 "$work/green.log")"
-pass "gate evaluation green on the solution"
+# Green once is not done: the gate keeps the turn open (exit 10) until three greens
+# in a row and a completeness review. The exercise ends here, at confirmation 1/3.
+python3 "$FM_SCRIPTS/run_gate_checks.py" --state "$state" --cwd "$repo" >"$work/green.log" 2>&1; code=$?
+[ "$code" -eq 10 ] && grep -q "confirmation 1/3" "$work/green.log" \
+  || fail "the gate is not green 1/3 on the solution (exit $code): $(tail -5 "$work/green.log")"
+pass "gate green on the solution: confirmation 1/3, where the exercise ends"
 tests_pass "$repo" || fail "the unit tests break on the exercise 3 solution"
 pass "unit tests still green"
 
