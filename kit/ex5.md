@@ -32,8 +32,8 @@ If your team is behind, skip the hand run in step 2. Do not skip the merge polic
 
 `/schedule` creates a routine in the cloud. The repair routine runs on a schedule of
 an hour or more. The merge routine runs on the pull request label `reviewed`, which
-`review.yml` adds when a review has run; install the Claude GitHub App on your copy
-so the event reaches it. Without routines, run both prompts by hand in a session.
+`review.yml` adds when a review has run; the Claude GitHub App you installed for the
+review is also what delivers that event to the routine. Without routines, run both prompts by hand in a session.
 
 ## Watch for
 

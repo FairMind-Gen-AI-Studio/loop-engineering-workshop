@@ -33,7 +33,8 @@ claude
 ```
 
 The brief (`.fairmind/design/DISC-1.md`) and the checks (`.fairmind/gate/`) are
-prepared. Tell it to use them, not to write new ones.
+prepared. Tell it to use them, not to write new ones. When it asks whether you have a
+Fairmind workspace, answer **no**: the loop runs on git, python3 and bash alone.
 
 1. **Read the brief before the checks.** The brief says what to build; the checks
    only say what is measured.
