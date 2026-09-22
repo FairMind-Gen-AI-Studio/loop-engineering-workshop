@@ -18,7 +18,8 @@ import shutil
 import subprocess
 import sys
 
-UPSTREAM = "https://github.com/FairMind-Gen-AI-Studio/loop-engineering-workshop.git"
+# WORKSHOP_UPSTREAM overrides the template location, for rehearsing offline.
+UPSTREAM = os.environ.get("WORKSHOP_UPSTREAM", "https://github.com/FairMind-Gen-AI-Studio/loop-engineering-workshop.git")
 PLUGIN_KEY = "fairmind-coding@fairmind-plugins"
 SECRET = "CLAUDE_CODE_OAUTH_TOKEN"
 EXERCISES = {
