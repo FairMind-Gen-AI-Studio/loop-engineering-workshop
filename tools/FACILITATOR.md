@@ -31,7 +31,7 @@ Overlays store `.fairmind/` as `_fairmind/`; the build renames it.
 
 - **Ex 1.** The receipt prints `24.5 EUR`. Any fix works; the point is the event log.
 - **Ex 2.** `shop/tax.py` truncates instead of rounding half up: `test_vat_rounds_half_up`
-  fails. CI waits 75 s in a step that says it checks nothing, so a `/loop` has
+  fails. CI waits 100 s in a step that says it checks nothing, so a `/loop` has
   something to wait for. `./workshop deploy` regresses at minute 7 for 3 minutes.
 - **Ex 3.** The ticket never says what `FREE100` takes 100% off. The brief does: items
   only, shipping still charged. `ac4-free-keeps-shipping` is the check `/goal` usually
