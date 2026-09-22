@@ -29,4 +29,4 @@ jobs:
       # The unit tests take a second. Real pipelines take minutes, and exercise 2
       # needs something to wait for, so this step waits and says so. It checks nothing.
       - name: Simulated integration stage
-        run: python scripts/integration_stage.py 75
+        run: python scripts/integration_stage.py 100
