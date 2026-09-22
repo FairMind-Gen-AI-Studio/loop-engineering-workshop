@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+"""Workshop helper. Run from the root of your copy of this repository.
+
+    ./workshop doctor          check the tools, the plugin and the review secret
+    ./workshop setup           labels, CODEOWNERS and the main ruleset on your copy
+    ./workshop reset <ex>      start an exercise from a clean branch
+    ./workshop deploy [args]   write the fake production log for exercise 2
+
+Exercises you can reset to: ex1, ex2, ex3-goal, ex3-loop, ex4, ex5. The starting
+branches are fetched from the public template, so they work in a copy made
+without "Include all branches".
+"""
+
+import json
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
+
+UPSTREAM = "https://github.com/FairMind-Gen-AI-Studio/loop-engineering-workshop.git"
+PLUGIN_KEY = "fairmind-coding@fairmind-plugins"
+SECRET = "CLAUDE_CODE_OAUTH_TOKEN"
+EXERCISES = {
+    "ex1": "main",
+    "ex2": "ex2-start",
+    "ex3-goal": "ex3-goal-start",
+    "ex3-loop": "ex3-loop-start",
+    "ex4": "ex4-start",
+    "ex5": "main",
+}
+# Files an exercise writes that a reset must not carry into the next one.
+SCRATCH = [".fairmind/active-context.json", "deploy.log", "run.jsonl", "tool-log.txt"]
+LABELS = {
+    "reviewed": ("0E8A16", "The Claude review has run on the latest push"),
+    "defect": ("D73A4A", "Found while using our own tools"),
+    "pr-opened": ("1D76DB", "Repair routine opened a fix"),
+    "needs-info": ("FBCA04", "Repair routine could not reproduce as written"),
+    "cannot-reproduce": ("BFD4F2", "Repair routine ran the reproduction and it passed"),
+}
+ROOT = pathlib.Path(__file__).resolve().parent
+
+
+def run(*cmd, check=True, capture=True):
+    result = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=capture)
+    if check and result.returncode != 0:
+        sys.exit(f"failed: {' '.join(cmd)}\n{result.stderr.strip()}")
+    return result
+
+
+def ok(label, passed, hint=""):
+    print(f"  {'✓' if passed else '✗'} {label}" + ("" if passed or not hint else f"  → {hint}"))
+    return passed
+
+
+def doctor():
+    print("tools")
+    results = []
+    for tool, hint in [("git", "install git"), ("gh", "https://cli.github.com"),
+                       ("jq", "brew install jq / apt install jq"), ("claude", "https://claude.com/claude-code")]:
+        results.append(ok(tool, shutil.which(tool) is not None, hint))
+    results.append(ok(f"python {sys.version.split()[0]}", sys.version_info >= (3, 10), "python 3.10 or later"))
+    try:
+        import pytest  # noqa: F401
+        results.append(ok("pytest", True))
+    except ImportError:
+        results.append(ok("pytest", False, "python3 -m pip install pytest"))
+
+    print("github")
+    authed = shutil.which("gh") and run("gh", "auth", "status", check=False).returncode == 0
+    results.append(ok("gh is logged in", bool(authed), "gh auth login"))
+    if authed:
+        secrets = run("gh", "secret", "list", check=False).stdout
+        results.append(ok(f"secret {SECRET}", SECRET in secrets,
+                          f"claude setup-token, then: gh secret set {SECRET}"))
+
+    print("claude code")
+    installed = pathlib.Path.home() / ".claude" / "plugins" / "installed_plugins.json"
+    try:
+        has_plugin = PLUGIN_KEY in json.loads(installed.read_text()).get("plugins", {})
+    except (OSError, ValueError):
+        has_plugin = False
+    results.append(ok("fairmind-coding plugin", has_plugin,
+                      "in Claude Code: /plugin marketplace add FairMind-Gen-AI-Studio/fairmind-plugins-public, "
+                      "then /plugin install fairmind-coding@fairmind-plugins"))
+
+    print("\nready" if all(results) else "\nfix the ✗ lines above, then run ./workshop doctor again")
+    return 0 if all(results) else 1
+
+
+def setup():
+    repo = run("gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner").stdout.strip()
+    user = run("gh", "api", "user", "-q", ".login").stdout.strip()
+    print(f"setting up {repo} for @{user}")
+
+    for name, (color, description) in LABELS.items():
+        run("gh", "label", "create", name, "--color", color, "--description", description, "--force")
+    print(f"  ✓ labels: {', '.join(LABELS)}")
+
+    owners = ROOT / ".github" / "CODEOWNERS"
+    text = owners.read_text()
+    if "@OWNER" in text:
+        owners.write_text(text.replace("@OWNER", f"@{user}"))
+        run("git", "add", str(owners))
+        run("git", "commit", "-m", f"CODEOWNERS: @{user} owns the paths that stay human")
+        run("git", "push", "origin", "HEAD")
+        print(f"  ✓ CODEOWNERS now names @{user} (committed and pushed)")
+    else:
+        print("  ✓ CODEOWNERS already names an owner")
+
+    existing = run("gh", "api", f"repos/{repo}/rulesets", "-q", ".[].name", check=False).stdout.split()
+    if "main" in existing:
+        print("  ✓ ruleset 'main' already exists")
+    else:
+        result = run("gh", "api", "-X", "POST", f"repos/{repo}/rulesets",
+                     "--input", ".github/rulesets/main.json", check=False)
+        if result.returncode != 0:
+            print("  ✗ ruleset not created: " + result.stderr.strip().splitlines()[-1]
+                  + "\n    rulesets need a public repository, or a paid plan for a private one")
+            return 1
+        print("  ✓ ruleset 'main': CI 'tests' required, code-owner review required, admins may bypass")
+    return 0
+
+
+def reset(exercise):
+    if exercise not in EXERCISES:
+        sys.exit(f"unknown exercise {exercise!r}; choose one of: {', '.join(EXERCISES)}")
+    branch = EXERCISES[exercise]
+    dirty = run("git", "status", "--porcelain").stdout.strip()
+    if dirty:
+        print("uncommitted changes will be discarded:\n" + dirty)
+        if input("continue? [y/N] ").strip().lower() != "y":
+            return 1
+    # A copy made from a template starts a new git history, so the template's
+    # branches share no commit with your main and a pull request from one would be
+    # refused. Instead, replay the difference between the template's main and the
+    # exercise branch on top of your own main.
+    run("git", "fetch", "--quiet", "origin", "main")
+    run("git", "fetch", "--quiet", UPSTREAM, f"+main:refs/workshop/main", f"+{branch}:refs/workshop/{branch}")
+    local = f"{exercise}-work"
+    run("git", "checkout", "--quiet", "--force", "-B", local, "origin/main")
+    for scratch in SCRATCH:
+        (ROOT / scratch).unlink(missing_ok=True)
+    if branch != "main":
+        patch = run("git", "diff", "--binary", "refs/workshop/main", f"refs/workshop/{branch}").stdout
+        applied = subprocess.run(["git", "apply", "--3way", "--index"], cwd=ROOT, input=patch, text=True,
+                                 capture_output=True)
+        if applied.returncode != 0:
+            sys.exit(f"could not start {exercise} on top of your main:\n{applied.stderr.strip()}\n"
+                     "ask the facilitator, or reset your main to the template's")
+        run("git", "commit", "--quiet", "-m", f"Start {exercise} from the workshop template")
+    print(f"on branch {local}, starting point of {exercise}. Open kit/{exercise.split('-')[0]}.md")
+    return 0
+
+
+def deploy(args):
+    return subprocess.call([sys.executable, str(ROOT / "scripts" / "fake_deploy.py"), *args], cwd=ROOT)
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help", "help"):
+        print(__doc__)
+        return 0
+    command, rest = argv[0], argv[1:]
+    if command == "doctor":
+        return doctor()
+    if command == "setup":
+        return setup()
+    if command == "reset" and len(rest) == 1:
+        return reset(rest[0])
+    if command == "deploy":
+        return deploy(rest)
+    print(__doc__)
+    return 2
+
+
+if __name__ == "__main__":
+    os.chdir(ROOT)
+    sys.exit(main(sys.argv[1:]))
