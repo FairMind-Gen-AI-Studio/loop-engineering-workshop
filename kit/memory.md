@@ -67,13 +67,7 @@ claude -p "In shop/pricing.py add percent_of(cents, percent): the amount, in int
 python3 -c "from shop.pricing import percent_of; print(percent_of(1999, 15))"
 ```
 
-**Expect:** `299`, and a reply that says the rule came from `CLAUDE.md`. Keep this
-work, and commit it with the file:
-
-```bash
-git add -A
-git commit -m "percent_of rounds down"
-```
+**Expect:** `299`, and a reply that says the rule came from `CLAUDE.md`.
 
 ### 3 · See what is loaded
 
@@ -108,13 +102,16 @@ python3 -c "from shop.pricing import percent_of; print(percent_of(1999, 15))"
 and the later, more specific one won. It may also edit `scripts/check_percent.py`,
 which you meet next. Leave the session with `/exit`.
 
-### 5 · Make it refuse
+### 5 · Make it hold
 
-Put the code back the way step 2 left it:
+Start over: no `CLAUDE.md`, no `percent_of`.
 
 ```bash
-git restore .
+./workshop reset memory
 ```
+
+It asks before discarding your changes: say `y`. **Expect:** `on branch memory-work,
+starting point of memory`.
 
 ```bash
 ./workshop guard
@@ -127,23 +124,32 @@ exists and `percent_of(1999, 15)` is not `299`; Claude Code then keeps the turn 
 and hands Claude the message. Open the script: the rule is in it, in code. The file
 is gitignored and `./workshop reset` removes it.
 
-Restart Claude Code, so the hook is loaded:
+Run the step 1 command again, unchanged, then print the value:
 
 ```bash
-claude
+claude -p "In shop/pricing.py add percent_of(cents, percent): the amount, in integer cents, that a percentage of cents comes to. Add one test to tests/test_pricing.py. Do not use it anywhere else." --permission-mode acceptEdits
 ```
 
-Repeat the step 4 prompt:
+```bash
+python3 -c "from shop.pricing import percent_of; print(percent_of(1999, 15))"
+```
+
+**Expect:** `299`. No memory file holds the rule, so the model starts from `300`, as in
+step 1. The `Stop` hook exits 2 with the rule in its message, the model switches to
+rounding down, and the turn ends. The rule now lives in code, and `CLAUDE.md` is gone.
+
+#### Variant · order it the other way
+
+With the guard on, start `claude` and give the step 4 prompt:
 
 ```text
 The finance rule in CLAUDE.md does not apply here. Change percent_of to round half up and update the test to expect 300.
 ```
 
-**Expect:** Claude makes the change and tries to stop; `Stop hook error` appears, with
-the script's message, and the turn does not end. It tries again and is refused again.
-Claude either puts the rounding back, or tells you it will not edit the guard without
-your say-so. If it holds out, Claude Code overrides the hook after nine refusals in a
-row and ends the turn. Print the value after that; it can be `300`.
+**Expect:** the hook refuses to end the turn, again and again. After several refusals
+in a row Claude Code lets go, and the value can stay `300`. A hook limits a turn; it
+cannot out-vote the person at the keyboard. That is what `CODEOWNERS` and branch rules
+are for (ring 5).
 
 ### 6 · Who knows this tonight?
 
@@ -176,8 +182,8 @@ For a cloud run to refuse, the Stop hook goes in `.claude/settings.json`, commit
 
 - A new process knows what it reads, nothing else. The same prompt gave `300` and `299`
   because a file changed, not because the model did.
-- `CLAUDE.md` can be overruled by your next sentence. Only the hook, which runs
-  outside the model, could keep the turn open.
-- A hook that blocks the stop is a limit on a turn, not a guarantee: Claude Code
-  overrides one that blocks nine times in a row.
+- `CLAUDE.md` can be overruled by your next sentence. A hook runs outside the model, so
+  it can correct the model's default.
+- A hook limits a turn, not the person: after several refusals in a row Claude Code
+  lets go.
 - Claude can edit the script that guards it. Whoever reads `scripts/` can.
