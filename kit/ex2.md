@@ -3,9 +3,10 @@
 **15 minutes · ring 2, `/loop` · branch: `./workshop reset ex2`**
 
 `/loop` repeats a prompt: on a fixed interval (`/loop 2m …`) or at a pace Claude picks
-after each pass (`/loop …`, one minute to one hour). A loop on a fixed interval never
-ends by itself. A self-paced loop ends when Claude decides the job is done, **if your
-prompt says what done means.**
+after each iteration (`/loop …`, one minute to one hour). A loop on a fixed interval
+never ends by itself. A self-paced loop ends when Claude decides the job is done, **if
+your prompt says what done means.** Claude's documentation calls each repetition an
+**iteration**, and one iteration holds the many turns you counted in exercise 1.
 
 You run two loops **at the same time**, each in its own terminal. Each one spends
 most of its life waiting.
@@ -28,18 +29,18 @@ claude
 The push starts CI. Paste this in Claude Code:
 
 ```text
-/loop Watch the CI run of branch ex2-work. Each pass, run:
+/loop Watch the CI run of branch ex2-work. Each iteration, run:
 gh run list --branch ex2-work --workflow CI --limit 1
 - Still queued or in progress: say "waiting", nothing else, and check again in about
   two minutes.
 - Failed: read why with gh run view <run id> --log-failed, fix the cause in the code,
   run the tests, then commit and push. The push starts a new CI run.
-- Succeeded, on the commit that is at the tip of ex2-work: tell me how many passes
+- Succeeded, on the commit that is at the tip of ex2-work: tell me how many iterations
   this loop took and what you fixed, then stop the loop. Do not check again.
 ```
 
-**Expect:** a few `waiting` passes, one fix and push, more `waiting`, then a summary
-and the loop ends. Count the passes.
+**Expect:** a few `waiting` iterations, one fix and push, more `waiting`, then a
+summary and the loop ends. Count the iterations.
 
 ### Variant · forget the stop
 
@@ -50,9 +51,9 @@ Once Loop A has ended, try the same watch with a fixed interval and **no stop ru
 status of the latest run.
 ```
 
-Let it fire three times after the run is green. Every pass costs tokens and tells you
-the same thing. Then stop it. A fixed-interval loop does not stop itself, and `Esc`
-only stops self-paced ones:
+Let it fire three times after the run is green. Every iteration costs tokens and tells
+you the same thing. Then stop it. A fixed-interval loop does not stop itself, and
+`Esc` only stops self-paced ones:
 
 ```text
 What scheduled tasks do I have? Cancel the CI status one.
@@ -75,7 +76,7 @@ claude
 
 ```text
 /loop Watch deploy.log: a fix just went to production, and the log gets one line per
-minute. Each pass, read only the lines added since your last pass.
+minute. Each iteration, read only the lines added since the previous one.
 - Every new line says status=ok: say "quiet", then wait longer than last time before
   the next check: 1 minute, then 2, then 5, then stay at 5.
 - Any new line says status=degraded: tell me the minute and the error_rate, and go
@@ -99,7 +100,7 @@ Count how many answers in a row are identical. Then cancel it as in Loop A.
 ## Watch for
 
 - The forgotten stop: the loop keeps firing after the pipeline is green, and every
-  pass is paid for.
+  iteration is paid for.
 - The interval: one minute feels responsive and mostly buys identical answers.
 - These loops die with your session. Which of these watches should have been a
   routine (`/schedule`), which keeps running with the laptop closed?

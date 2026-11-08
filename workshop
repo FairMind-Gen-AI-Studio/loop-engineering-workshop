@@ -4,8 +4,9 @@
     ./workshop doctor          check the tools; what only some exercises need is listed as not needed yet
     ./workshop setup           labels, CODEOWNERS and the main ruleset on your copy
     ./workshop reset <ex>      start an exercise from a clean branch
-    ./workshop events <file>   what a headless run did, pass by pass (exercise 1)
+    ./workshop events <file>   what a headless run did, turn by turn (exercise 1)
     ./workshop hook            log every tool call to tool-log.txt (exercise 1)
+    ./workshop clear-log       empty tool-log.txt before the next run (exercise 1)
     ./workshop guard           make a turn refuse to end on a wrong percent_of (memory)
     ./workshop deploy [args]   write the fake production log for exercise 2
 
@@ -205,27 +206,40 @@ def events(path):
         stream = read_events(path)
     except OSError as err:
         sys.exit(f"cannot read {path}: {err.strerror}. Run step 1 of exercise 1 first.")
-    passes, tools, last_text = 0, [], ""
-    for event in stream:
-        if event.get("type") != "assistant":
-            continue
-        passes += 1
-        content = event.get("message", {}).get("content", [])
-        calls = [block for block in content if block.get("type") == "tool_use"]
-        tools.extend(call["name"] for call in calls)
-        text = " ".join(block.get("text", "") for block in content if block.get("type") == "text").strip()
-        if text and not calls:
-            last_text = text
-    result = next((event for event in reversed(stream) if event.get("type") == "result"), {})
+    # The stream carries one content block per event, so one answer from the model
+    # spans several events sharing a message id. That answer is one turn, one time
+    # around the loop, however many tools it asks for.
+    turns, failed = {}, set()
+    for index, event in enumerate(stream):
+        message = event.get("message", {})
+        if event.get("type") == "assistant":
+            turns.setdefault(message.get("id", index), []).extend(message.get("content", []))
+        elif event.get("type") == "user":
+            failed.update(block.get("tool_use_id") for block in message.get("content", [])
+                          if isinstance(block, dict) and block.get("is_error"))
 
-    print(f"tool calls, in order ({len(tools)}):")
-    for number, name in enumerate(tools, 1):
-        print(f"  {number:>3}  {name}")
-    print(f"assistant messages: {passes}")
-    print(f"turns reported by the run: {result.get('num_turns', '?')}")
-    print("\nthe message that ended the turn (no tool call):")
+    number, last_text = 0, ""
+    for turn_number, blocks in enumerate(turns.values(), 1):
+        print(f"turn {turn_number}")
+        calls = [block for block in blocks if block.get("type") == "tool_use"]
+        for call in calls:
+            number += 1
+            print(f"  {number:>3}  {call['name']}{' FAILED' if call.get('id') in failed else ''}  {target(call)}".rstrip())
+        if not calls:
+            print("       no tool call: the loop ends here")
+            last_text = " ".join(block.get("text", "") for block in blocks if block.get("type") == "text").strip()
+
+    print(f"\n{len(turns)} turns, {number} tool calls")
+    print("\nthe message that ended the loop (no tool call):")
     print("  " + (last_text[:600] or "(none found)").replace("\n", "\n  "))
     return 0
+
+
+def target(call):
+    # What a tool call acted on: a file, a command, a search.
+    tool_input = call.get("input", {})
+    value = next((tool_input[key] for key in ("file_path", "command", "pattern", "skill") if key in tool_input), "")
+    return str(value).strip().split("\n")[0].removeprefix(f"{ROOT.as_posix()}/")[:70]
 
 
 def hook():
@@ -265,6 +279,12 @@ def log_tool():
     return 0
 
 
+def clear_log():
+    (ROOT / "tool-log.txt").unlink(missing_ok=True)
+    print("tool-log.txt is empty; the next run starts it again")
+    return 0
+
+
 def deploy(args):
     return subprocess.call([sys.executable, str(ROOT / "scripts" / "fake_deploy.py"), *args], cwd=ROOT)
 
@@ -288,6 +308,8 @@ def main(argv):
         return guard()
     if command == "log-tool":
         return log_tool()
+    if command == "clear-log":
+        return clear_log()
     if command == "deploy":
         return deploy(rest)
     print(__doc__)
