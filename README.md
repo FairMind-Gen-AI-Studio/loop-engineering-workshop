@@ -1,18 +1,17 @@
 # Loop engineering workshop
 
-The exercises for **Loop Engineering with Claude Code**, a FairMind Academy workshop
-with a two-hour run. Five loops, each built on the one inside it, and one exercise on
-what a run carries over to the next:
+The exercises for **Loop Engineering with Claude Code**, a FairMind Academy workshop.
+Five loops, each built on the one inside it, and one exercise on what a run carries
+over to the next:
 
-| Exercise | Loop | Where |
-|---|---|---|
-| 1 · [Watch the loop you already run](kit/ex1.md) | the agentic loop: model, tool, result | room |
-| 2 · [Put a clock on it](kit/ex2.md) | `/loop`: repetition on a clock | room |
-| 3, run 1 · [Same task, two evaluators](kit/ex3.md) | `/goal`: an exit the maker does not judge | room |
-| [What the next run knows](kit/memory.md) | memory: what a new run starts with | room |
-| 3, run 2 and Compare · [Same task, two evaluators](kit/ex3.md) | `/fairmind-loop`: an exit that runs checks | advanced, optional |
-| 4 · [Write your own review loop](kit/ex4.md) | the pull request review loop | home |
-| 5 · [Close the loop on today](kit/ex5.md) | dogfooding: defects → nightly repair → merge | home |
+| Exercise | Loop |
+|---|---|
+| 1 · [Watch the loop you already run](kit/ex1.md) | the agentic loop: model, tool, result |
+| 2 · [Put a clock on it](kit/ex2.md) | `/loop`: repetition on a clock |
+| 3 · [Same task, two evaluators](kit/ex3.md) | `/goal`: an exit the maker does not judge; `/fairmind-loop` as an advanced track |
+| 4 · [Write your own review loop](kit/ex4.md) | the pull request review loop |
+| 5 · [Close the loop on today](kit/ex5.md) | dogfooding: defects → nightly repair → merge |
+| [What the next run knows](kit/memory.md) | memory: what a new run starts with |
 
 Everything runs on `shop/`, a checkout small enough to read in five minutes.
 Amounts are integer cents; `python3 -m shop` prints a receipt.
@@ -40,7 +39,7 @@ installed from python.org or with `winget` is called `python` and `py` there, no
 `python3`. `./workshop doctor` checks it on Windows. If it shows `·`, do run 2
 alongside someone on macOS or Linux.
 
-## For the room · 15 minutes
+## Before the workshop · 15 minutes
 
 Do this the day before.
 
@@ -78,7 +77,7 @@ Do this the day before.
 
    Lines marked `·` belong to the sections below; they are not needed yet.
 
-## Only for exercises 4 and 5, at home
+## Only for exercises 4 and 5
 
 Make the copy **public**: branch rulesets, which exercise 5 uses, need a public
 repository or a paid plan. Your exercise work will be visible.
@@ -98,7 +97,7 @@ repository or a paid plan. Your exercise work will be visible.
 2. **Check, then set up:**
 
    ```bash
-   ./workshop doctor      # the "at home" lines should be ✓
+   ./workshop doctor      # the "exercises 4 and 5" lines should be ✓
    ./workshop setup       # labels, CODEOWNERS, the main ruleset
    ```
 
