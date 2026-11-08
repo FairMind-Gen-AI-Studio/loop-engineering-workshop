@@ -26,7 +26,19 @@ Amounts are integer cents; `python3 -m shop` prints a receipt.
 
   Routines (`/schedule`, the optional part of exercise 5) need a subscription login;
   with an API key only, you run the same prompts by hand, which the exercise expects.
-- macOS or Linux. On Windows, use WSL; the commands below assume a POSIX shell.
+- macOS, Linux or Windows. On Windows, use PowerShell, with
+  [Git for Windows](https://git-scm.com/downloads/win) installed: Claude Code runs its
+  hooks and shell commands through the Git Bash it brings.
+
+**On Windows**, type `py workshop` wherever these pages say `./workshop`, and `py`
+where they say `python3`. Everything else is the same: the prompts you paste into
+Claude Code, `git`, `gh` and `claude` do not change.
+
+**Not yet tested on Windows: exercise 3, run 2** (the advanced track). The
+`fairmind-coding` plugin runs its loop gate as `python3` inside Git Bash, and a Python
+installed from python.org or with `winget` is called `python` and `py` there, not
+`python3`. `./workshop doctor` checks it on Windows. If it shows `·`, do run 2
+alongside someone on macOS or Linux.
 
 ## For the room · 15 minutes
 
@@ -34,13 +46,34 @@ Do this the day before.
 
 1. **Make your own copy.** On GitHub, **Use this template → Create a new repository**,
    in your own account. Then clone your copy and `cd` into it.
-2. **Install the tools:** [Claude Code](https://claude.com/claude-code), logged in
-   with your subscription or started with `export ANTHROPIC_API_KEY=<your key>`;
-   git, Python 3.10 or later, and `python3 -m pip install pytest`.
-3. **Check:**
+2. **Install the tools:** [Claude Code](https://claude.com/claude-code),
+   [GitHub CLI](https://cli.github.com) then `gh auth login`, git, Python 3.10 or
+   later, and `python3 -m pip install pytest`. On Windows, in PowerShell:
+
+   ```powershell
+   winget install Anthropic.ClaudeCode
+   winget install Git.Git
+   winget install GitHub.cli
+   winget install Python.Python.3.12
+   py -m pip install pytest               # in a new terminal, after the installs
+   ```
+
+   Log Claude Code in with your subscription, **or** give it the API key in the
+   terminal you will work in (every new terminal needs it again):
 
    ```bash
-   ./workshop doctor      # every line under "tools" should be ✓
+   export ANTHROPIC_API_KEY=<your key>          # macOS, Linux
+   $env:ANTHROPIC_API_KEY = "<your key>"        # Windows PowerShell
+   ```
+
+3. **Trust your copy.** In the folder of your copy, run `claude` once, answer **yes**
+   to the question about trusting the folder, then type `/exit`. Until you do, Claude
+   Code ignores `.claude/settings.json`, which pre-approves the test and `git`/`gh`
+   commands the exercises run, and `/goal` (exercise 3) is not available.
+4. **Check:**
+
+   ```bash
+   ./workshop doctor      # every line under "tools" should be ✓   (Windows: py workshop doctor)
    ```
 
    Lines marked `·` belong to the sections below; they are not needed yet.
@@ -50,8 +83,7 @@ Do this the day before.
 Make the copy **public**: branch rulesets, which exercise 5 uses, need a public
 repository or a paid plan. Your exercise work will be visible.
 
-1. [GitHub CLI](https://cli.github.com) then `gh auth login`, and `jq`.
-2. **Let Claude review your pull requests.** Two things, both on your copy:
+1. **Let Claude review your pull requests.** Two things, both on your copy:
    - install the [Claude GitHub App](https://github.com/apps/claude) and give it
      access to your copy: the review posts through it;
    - give the review its credential, **one** of:
@@ -63,7 +95,7 @@ repository or a paid plan. Your exercise work will be visible.
      gh secret set CLAUDE_CODE_OAUTH_TOKEN       # paste it when asked
      ```
 
-3. **Set up:**
+2. **Check, then set up:**
 
    ```bash
    ./workshop doctor      # the "at home" lines should be ✓
@@ -76,7 +108,8 @@ repository or a paid plan. Your exercise work will be visible.
 
 ## Only for the advanced track, exercise 3 run 2
 
-Install the plugin. Inside Claude Code:
+Install `jq`, then the plugin (on Windows: `winget install jqlang.jq`). Inside Claude
+Code:
 
 ```
 /plugin marketplace add FairMind-Gen-AI-Studio/fairmind-plugins-public
@@ -105,6 +138,7 @@ your own `main`, so the pull requests you open go to your copy.
 | `.github/ISSUE_TEMPLATE/defect.yml` | a defect with a stable key and a Reproduce block |
 | `.github/CODEOWNERS`, `.github/rulesets/main.json` | the paths that stay human, and what GitHub enforces |
 | `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
+| `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
 | `.claude/skills/review-loop/` | the skill you write in exercise 4 |
 | `scripts/fake_deploy.py` | the fake production log for exercise 2 |
 | `scripts/check_percent.py` | the check the Stop hook runs in the memory exercise |
@@ -115,6 +149,9 @@ your own `main`, so the pull requests you open go to your copy.
 | Symptom | Cause and fix |
 |---|---|
 | `./workshop doctor` shows ✗ | the line after the arrow says what to install or run; `·` lines are for later |
+| Claude asks permission for every test or `git` command | the folder is not trusted: run `claude` there once and answer yes |
+| `./workshop` does nothing on Windows | type `py workshop …` instead |
+| `claude` says Git Bash was not found (Windows) | install Git for Windows, then open a new terminal |
 | Claude asks permission for every test or `git` command | the folder is not trusted: run `claude` there once and answer yes |
 | `./workshop` does nothing on Windows | type `py workshop …` instead |
 | `claude` says Git Bash was not found (Windows) | install Git for Windows, then open a new terminal |

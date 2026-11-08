@@ -70,7 +70,7 @@ def doctor():
     print("tools")
     results = []
     for tool, hint in [("git", "install git (on Windows: Git for Windows, which brings Git Bash)"),
-                       ("claude", "https://claude.com/claude-code")]:
+                       ("gh", "https://cli.github.com"), ("claude", "https://claude.com/claude-code")]:
         results.append(ok(tool, shutil.which(tool) is not None, hint))
     results.append(ok(f"python {sys.version.split()[0]}", sys.version_info >= (3, 10), "python 3.10 or later"))
     try:
@@ -91,11 +91,10 @@ def doctor():
     results.append(ok("this folder is trusted", trusted,
                       "run `claude` here once, accept the trust question, then /exit"))
 
-    print("\nat home, exercises 4 and 5")
-    later("gh", shutil.which("gh") is not None, "https://cli.github.com")
-    later("jq", shutil.which("jq") is not None, "brew install jq / apt install jq / winget install jqlang.jq")
     authed = bool(shutil.which("gh")) and run("gh", "auth", "status", check=False).returncode == 0
-    later("gh is logged in", authed, "gh auth login")
+    results.append(ok("gh is logged in", authed, "gh auth login"))
+
+    print("\nat home, exercises 4 and 5")
     if authed:
         listed = run("gh", "secret", "list", check=False).stdout.split()
         present = [name for name in SECRETS if name in listed]
@@ -103,6 +102,7 @@ def doctor():
               "gh secret set ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN, see README)")
 
     print("\nadvanced, exercise 3 run 2")
+    later("jq", shutil.which("jq") is not None, "brew install jq / apt install jq / winget install jqlang.jq")
     installed = pathlib.Path.home() / ".claude" / "plugins" / "installed_plugins.json"
     try:
         has_plugin = PLUGIN_KEY in json.loads(installed.read_text()).get("plugins", {})
