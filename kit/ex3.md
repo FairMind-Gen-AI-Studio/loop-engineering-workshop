@@ -46,7 +46,7 @@ That question is the point of run 1. Write your answer down before you go on.
 
 ## Advanced (optional) · Run 2 · `/fairmind-loop`
 
-Needs the plugin, see README. For whoever finishes early, or at home.
+Needs the plugin, see README.
 
 ```bash
 ./workshop reset ex3-loop

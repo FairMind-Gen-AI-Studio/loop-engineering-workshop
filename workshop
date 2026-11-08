@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Workshop helper. Run from the root of your copy of this repository.
 
-    ./workshop doctor          check what the room needs; the rest is listed as not needed yet
+    ./workshop doctor          check the tools; what only some exercises need is listed as not needed yet
     ./workshop setup           labels, CODEOWNERS and the main ruleset on your copy
     ./workshop reset <ex>      start an exercise from a clean branch
     ./workshop events <file>   what a headless run did, pass by pass (exercise 1)
@@ -61,7 +61,7 @@ def ok(label, passed, hint=""):
 
 
 def later(label, passed, hint=""):
-    # Needed by the at-home exercises or the advanced track, not by the room.
+    # Needed only by exercises 4 and 5, or by exercise 3 run 2.
     mark = "✓" if passed else "·"
     print(f"  {mark} {label}" + ("" if passed or not hint else f"  → not needed yet: {hint}"))
 
@@ -94,7 +94,7 @@ def doctor():
     authed = bool(shutil.which("gh")) and run("gh", "auth", "status", check=False).returncode == 0
     results.append(ok("gh is logged in", authed, "gh auth login"))
 
-    print("\nat home, exercises 4 and 5")
+    print("\nexercises 4 and 5")
     if authed:
         listed = run("gh", "secret", "list", check=False).stdout.split()
         present = [name for name in SECRETS if name in listed]
@@ -119,7 +119,7 @@ def doctor():
         later("python3 inside Git Bash", found,
               "not tested on Windows yet: do exercise 3 run 2 with someone on macOS or Linux")
 
-    print("\nready for the room" if all(results) else "\nfix the ✗ lines above, then run ./workshop doctor again")
+    print("\nready to start" if all(results) else "\nfix the ✗ lines above, then run ./workshop doctor again")
     return 0 if all(results) else 1
 
 
