@@ -1,10 +1,10 @@
 # Exercise 3 · Same task, two evaluators
 
-**25 minutes · ring 3, `/goal` and `/fairmind-loop`**
+**15 minutes for the core, run 1 · ring 3, `/goal`. Run 2 and Compare: advanced, optional, +15 minutes**
 
-One task, run twice. First the exit condition is judged by a model reading the
-session (`/goal`). Then it is judged by checks that run (`/fairmind-loop`). Compare
-what each one accepted as done.
+One task. The exit condition is judged by a model reading the session (`/goal`). In
+the advanced track it is then judged by checks that run (`/fairmind-loop`), and you
+compare what each one accepted as done.
 
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
@@ -34,7 +34,19 @@ for shipping.
 
 **Keep this answer:** it is what `/goal` accepted as done. Then `/exit`.
 
-## Run 2 · `/fairmind-loop`
+## The end of the core path
+
+`TICKET.md` never says what `FREE100` does to shipping. `/goal`'s evaluator judged
+from the conversation and ran nothing. So who decided what `FREE100` does to
+shipping?
+
+That question is the point of run 1. Write your answer down before you go on.
+
+---
+
+## Advanced (optional) · Run 2 · `/fairmind-loop`
+
+Needs the plugin, see README. For whoever finishes early, or at home.
 
 ```bash
 ./workshop reset ex3-loop
@@ -83,7 +95,7 @@ then a fix, then a green evaluation. The exercise ends at the first green
 (`confirmation 1/3`). Reaching `passed_pending_human` takes three greens and a
 completeness review: that is the overflow, not the exercise.
 
-## Compare
+## Advanced (optional) · Compare
 
 In the same session:
 

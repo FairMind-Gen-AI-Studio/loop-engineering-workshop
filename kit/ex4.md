@@ -1,5 +1,7 @@
 # Exercise 4 · Write your own review loop
 
+*At home in the two-hour format.*
+
 **20 minutes · ring 4, the review loop · branch: `./workshop reset ex4`**
 
 Opening a pull request starts `.github/workflows/review.yml`: Claude reads the diff,
