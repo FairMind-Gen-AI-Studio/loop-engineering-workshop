@@ -1,5 +1,7 @@
 # Exercise 5 · Close the loop on today
 
+*At home in the two-hour format.*
+
 **30 minutes, in teams of two or three · ring 5, dogfooding · branch: `./workshop reset ex5`**
 
 What broke during exercises 1 to 4 becomes a queue; a routine works the queue at

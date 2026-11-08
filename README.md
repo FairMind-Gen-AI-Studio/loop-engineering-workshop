@@ -1,84 +1,57 @@
 # Loop engineering workshop
 
-The exercises for **Loop Engineering with Claude Code**, a half-day FairMind Academy
-workshop. Five loops, each built on the one inside it:
+The exercises for **Loop Engineering with Claude Code**, a FairMind Academy workshop
+with a two-hour run. Five loops, each built on the one inside it, and one exercise on
+what a run carries over to the next:
 
-| Ring | Loop | Exercise |
+| Exercise | Loop | Where |
 |---|---|---|
-| 1 | the agentic loop: model, tool, result | [Watch the loop you already run](kit/ex1.md) |
-| 2 | `/loop`: repetition on a clock | [Put a clock on it](kit/ex2.md) |
-| 3 | `/goal` and `/fairmind-loop`: an exit the maker does not judge | [Same task, two evaluators](kit/ex3.md) |
-| 4 | the pull request review loop | [Write your own review loop](kit/ex4.md) |
-| 5 | dogfooding: defects → nightly repair → merge | [Close the loop on today](kit/ex5.md) |
+| 1 · [Watch the loop you already run](kit/ex1.md) | the agentic loop: model, tool, result | room |
+| 2 · [Put a clock on it](kit/ex2.md) | `/loop`: repetition on a clock | room |
+| 3, run 1 · [Same task, two evaluators](kit/ex3.md) | `/goal`: an exit the maker does not judge | room |
+| [What the next run knows](kit/memory.md) | memory: what a new run starts with | room |
+| 3, run 2 and Compare · [Same task, two evaluators](kit/ex3.md) | `/fairmind-loop`: an exit that runs checks | advanced, optional |
+| 4 · [Write your own review loop](kit/ex4.md) | the pull request review loop | home |
+| 5 · [Close the loop on today](kit/ex5.md) | dogfooding: defects → nightly repair → merge | home |
 
 Everything runs on `shop/`, a checkout small enough to read in five minutes.
 Amounts are integer cents; `python3 -m shop` prints a receipt.
 
 ## What you need
 
-- A **GitHub account**, and the rights to create a public repository in it.
+- A **GitHub account**.
 - **Access to Claude**, one of:
   - an **Anthropic API key**, from the credits your facilitator gives you; or
   - a **Claude subscription** (Pro, Max, Team or Enterprise).
 
   Routines (`/schedule`, the optional part of exercise 5) need a subscription login;
   with an API key only, you run the same prompts by hand, which the exercise expects.
-- macOS, Linux or Windows. On Windows, use PowerShell, with
-  [Git for Windows](https://git-scm.com/downloads/win) installed: Claude Code runs its
-  hooks and shell commands through the Git Bash it brings.
+- macOS or Linux. On Windows, use WSL; the commands below assume a POSIX shell.
 
-**On Windows**, type `py workshop` wherever these pages say `./workshop`, and `py`
-where they say `python3`. Everything else is the same: the prompts you paste into
-Claude Code, `git`, `gh` and `claude` do not change.
+## For the room · 15 minutes
 
-**Not yet tested on Windows: exercise 3, run 2.** The `fairmind-coding` plugin runs
-its loop gate as `python3` inside Git Bash, and a Python installed from python.org or
-with `winget` is called `python` and `py` there, not `python3`. `./workshop doctor`
-checks it on Windows. If it shows ✗, do run 2 alongside someone on macOS or Linux.
-
-## Before the workshop · 20 minutes
-
-Do this the day before. `./workshop doctor`, at the end, checks the tools, the plugin and
-the review secret; the GitHub App it cannot see, so check that one by hand.
+Do this the day before.
 
 1. **Make your own copy.** On GitHub, **Use this template → Create a new repository**,
-   in your own account. Make it **public**: branch rulesets, which exercise 5 uses,
-   need a public repository or a paid plan. Your exercise work will be visible.
-   Then clone your copy and `cd` into it.
-2. **Install the tools:** [Claude Code](https://claude.com/claude-code),
-   [GitHub CLI](https://cli.github.com) then `gh auth login`, `jq`, Python 3.10 or
-   later, and `python3 -m pip install pytest`. On Windows, in PowerShell:
-
-   ```powershell
-   winget install Anthropic.ClaudeCode
-   winget install Git.Git
-   winget install GitHub.cli
-   winget install jqlang.jq
-   winget install Python.Python.3.12
-   py -m pip install pytest               # in a new terminal, after the installs
-   ```
-
-   Log Claude Code in with your subscription, **or** give it the API key in the
-   terminal you will work in (every new terminal needs it again):
+   in your own account. Then clone your copy and `cd` into it.
+2. **Install the tools:** [Claude Code](https://claude.com/claude-code), logged in
+   with your subscription or started with `export ANTHROPIC_API_KEY=<your key>`;
+   git, Python 3.10 or later, and `python3 -m pip install pytest`.
+3. **Check:**
 
    ```bash
-   export ANTHROPIC_API_KEY=<your key>          # macOS, Linux
-   $env:ANTHROPIC_API_KEY = "<your key>"        # Windows PowerShell
+   ./workshop doctor      # every line under "tools" should be ✓
    ```
 
-3. **Trust your copy.** In the folder of your copy, run `claude` once, answer **yes**
-   to the question about trusting the folder, then type `/exit`. Until you do, Claude
-   Code ignores `.claude/settings.json`, which pre-approves the test and `git`/`gh`
-   commands the exercises run, and `/goal` (exercise 3) is not available.
-4. **Install the plugin** (exercise 3). Inside Claude Code:
+   Lines marked `·` belong to the sections below; they are not needed yet.
 
-   ```
-   /plugin marketplace add FairMind-Gen-AI-Studio/fairmind-plugins-public
-   /plugin install fairmind-coding@fairmind-plugins
-   ```
+## Only for exercises 4 and 5, at home
 
-5. **Let Claude review your pull requests** (exercises 4 and 5). Two things, both on
-   your copy:
+Make the copy **public**: branch rulesets, which exercise 5 uses, need a public
+repository or a paid plan. Your exercise work will be visible.
+
+1. [GitHub CLI](https://cli.github.com) then `gh auth login`, and `jq`.
+2. **Let Claude review your pull requests.** Two things, both on your copy:
    - install the [Claude GitHub App](https://github.com/apps/claude) and give it
      access to your copy: the review posts through it;
    - give the review its credential, **one** of:
@@ -90,22 +63,32 @@ the review secret; the GitHub App it cannot see, so check that one by hand.
      gh secret set CLAUDE_CODE_OAUTH_TOKEN       # paste it when asked
      ```
 
-6. **Check, then set up:**
+3. **Set up:**
 
    ```bash
-   ./workshop doctor      # every line should be ✓   (Windows: py workshop doctor)
+   ./workshop doctor      # the "at home" lines should be ✓
    ./workshop setup       # labels, CODEOWNERS, the main ruleset
    ```
 
    `setup` commits one change to your `main` (it puts your username in
-   `.github/CODEOWNERS`) and pushes it, then turns on the ruleset. Run it once.
+   `.github/CODEOWNERS`) and pushes it, then turns on the ruleset. Run it once. The
+   GitHub App `doctor` cannot see, so check that one by hand.
+
+## Only for the advanced track, exercise 3 run 2
+
+Install the plugin. Inside Claude Code:
+
+```
+/plugin marketplace add FairMind-Gen-AI-Studio/fairmind-plugins-public
+/plugin install fairmind-coding@fairmind-plugins
+```
 
 ## During the workshop
 
 Each exercise starts from a clean branch:
 
 ```bash
-./workshop reset ex2        # ex1, ex2, ex3-goal, ex3-loop, ex4, ex5
+./workshop reset ex2        # ex1, ex2, ex3-goal, ex3-loop, memory, ex4, ex5
 ```
 
 It asks before discarding uncommitted changes, and builds the exercise on top of
@@ -116,7 +99,7 @@ your own `main`, so the pull requests you open go to your copy.
 | Path | What |
 |---|---|
 | `shop/`, `tests/` | the application and its tests (`python3 -m pytest`) |
-| `kit/` | one handout per exercise, plus `kit/ex5/` for the dogfooding exercise |
+| `kit/` | one handout per exercise, `kit/memory.md` for the memory exercise, and `kit/ex5/` for the dogfooding exercise |
 | `.github/workflows/ci.yml` | tests plus a clearly labelled simulated slow stage, about two minutes |
 | `.github/workflows/review.yml` | Claude reviews every pull request, then labels it `reviewed` |
 | `.github/ISSUE_TEMPLATE/defect.yml` | a defect with a stable key and a Reproduce block |
@@ -124,13 +107,14 @@ your own `main`, so the pull requests you open go to your copy.
 | `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
 | `.claude/skills/review-loop/` | the skill you write in exercise 4 |
 | `scripts/fake_deploy.py` | the fake production log for exercise 2 |
+| `scripts/check_percent.py` | the check the Stop hook runs in the memory exercise |
 | `workshop` | `doctor`, `setup`, `reset`, `events`, `hook`, `deploy` |
 
 ## If something goes wrong
 
 | Symptom | Cause and fix |
 |---|---|
-| `./workshop doctor` shows ✗ | the line after the arrow says what to install or run |
+| `./workshop doctor` shows ✗ | the line after the arrow says what to install or run; `·` lines are for later |
 | Claude asks permission for every test or `git` command | the folder is not trusted: run `claude` there once and answer yes |
 | `./workshop` does nothing on Windows | type `py workshop …` instead |
 | `claude` says Git Bash was not found (Windows) | install Git for Windows, then open a new terminal |
