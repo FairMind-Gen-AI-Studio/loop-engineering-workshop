@@ -55,10 +55,11 @@ old `workshop`. `verify.sh` fails on exactly that ("rolls main's files back").
   `CLAUDE.md` a new headless run prints `300` for `percent_of(1999, 15)`; with it, `299`.
   The point is what a fresh process starts with: the files it reads. Step 4 shows that
   a prompt outranks `CLAUDE.md`, because both are context. Step 5 shows the one thing
-  that does not depend on the model, a `Stop` hook (`./workshop guard`, running
-  `scripts/check_percent.py`). Claude Code ends the turn anyway after nine refusals in
-  a row, so the hook is a limit on a turn, not a guarantee; say so. In step 4 Claude may
-  edit `scripts/check_percent.py`; step 5 begins with `git restore .` for that reason.
+  that does not depend on the model: after a reset, a `Stop` hook (`./workshop guard`,
+  running `scripts/check_percent.py`) corrects the model's default `300` to `299`
+  with no memory file at all. The variant, with the step 4 prompt, shows the limit:
+  Claude Code lets go after several refusals in a row, so a hook limits a turn and
+  cannot out-vote the person; that is what CODEOWNERS and branch rules are for.
   Step 6 is the bridge to the at-home exercises: a cloud run has what is in the clone.
   `reset` removes `CLAUDE.md`, the guard's settings and the code.
 - **Ex 4.** `shipping_for` uses `>` where the docstring says "50.00 EUR or more", and
