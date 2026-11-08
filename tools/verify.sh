@@ -139,6 +139,48 @@ echo '{"tool_name":"Edit","hook_event_name":"PostToolUseFailure"}' | (cd "$work"
 git -C "$helpers" status --porcelain | grep -q . && fail "hook or events left a file git would commit"
 pass "hook: the command it writes logs successes and failures from any directory, and nothing is left to commit"
 
+echo "memory: scripts/check_percent.py and workshop guard (the memory exercise)"
+mem="$work/memory"
+clone main "$mem"
+check() { (cd "$work" && python3 "$mem/scripts/check_percent.py" >"$work/check.out" 2>"$work/check.err"); }
+check || fail "check_percent.py is red when percent_of does not exist yet"
+pass "check_percent.py: green while percent_of does not exist"
+cp "$mem/shop/pricing.py" "$work/pricing.orig"
+cat >>"$mem/shop/pricing.py" <<'PY'
+
+
+def percent_of(cents, percent):
+    from decimal import ROUND_HALF_UP, Decimal
+    return int((Decimal(cents) * Decimal(percent) / 100).quantize(Decimal(1), rounding=ROUND_HALF_UP))
+PY
+check; [ $? -eq 2 ] || fail "check_percent.py is not red (exit 2) on a half-up percent_of"
+grep -q "299" "$work/check.err" || fail "check_percent.py gave no message on stderr: $(cat "$work/check.err")"
+pass "check_percent.py: exit 2 with a message on a half-up percent_of"
+cp "$work/pricing.orig" "$mem/shop/pricing.py"
+cat >>"$mem/shop/pricing.py" <<'PY'
+
+
+def percent_of(cents, percent):
+    return cents * percent // 100
+PY
+check || fail "check_percent.py is red on a floor percent_of"
+pass "check_percent.py: green on a floor percent_of"
+(cd "$mem" && python3 workshop guard >"$work/guard.out") || fail "guard errored"
+guard_command="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["hooks"]["Stop"][0]["hooks"][0]["command"])' \
+  "$mem/.claude/settings.local.json")" || fail "guard did not write valid JSON with a Stop command"
+grep -q '"Stop"' "$work/guard.out" || fail "guard does not print what it wrote"
+(cd "$work" && bash -c "$guard_command") || fail "the guard's Stop command is red on a floor percent_of, from another directory"
+cp "$work/pricing.orig" "$mem/shop/pricing.py"
+cat >>"$mem/shop/pricing.py" <<'PY'
+
+
+def percent_of(cents, percent):
+    return round(cents * percent / 100)
+PY
+(cd "$work" && bash -c "$guard_command" 2>/dev/null); [ $? -eq 2 ] || fail "the guard's Stop command does not exit 2 on a half-up percent_of"
+git -C "$mem" status --porcelain | grep -q settings.local && fail "guard left a file git would commit"
+pass "guard: valid JSON, printed, and its Stop command exits 2 on half-up and 0 on floor"
+
 echo "workshop reset, in a copy made from the template"
 origin="$work/copy-origin.git"; copy="$work/copy"
 git init -q --bare -b main "$origin"
@@ -147,7 +189,7 @@ git -C "$copy" init -q -b main && git -C "$copy" add -A
 git -C "$copy" -c user.email=v@example.invalid -c user.name=v commit -qm "Initial commit"
 git -C "$copy" remote add origin "$origin" && git -C "$copy" push -q origin main
 git -C "$copy" config user.email v@example.invalid && git -C "$copy" config user.name v
-for ex in ex2 ex3-loop ex4; do
+for ex in ex2 ex3-loop memory ex4; do
   (cd "$copy" && WORKSHOP_UPSTREAM="$ROOT" ./workshop reset "$ex" </dev/null >/dev/null 2>"$work/reset.err") \
     || fail "reset $ex failed in a template copy: $(cat "$work/reset.err")"
   git -C "$copy" merge-base --is-ancestor origin/main HEAD || fail "reset $ex is not built on the copy's main"
@@ -161,6 +203,21 @@ grep -q FREE_SHIPPING_FROM "$copy/shop/pricing.py" || fail "reset ex4 did not br
 (cd "$copy" && python3 workshop hook >/dev/null && WORKSHOP_UPSTREAM="$ROOT" ./workshop reset ex2 </dev/null >/dev/null 2>&1) \
   || fail "reset after hook failed"
 [ -e "$copy/.claude/settings.local.json" ] && fail "reset kept the exercise 1 hook"
-pass "reset builds ex2, ex3-loop, ex4 on the copy's own main, keeps main's files, and nothing leaks between them"
+# What the memory exercise creates: the rule file, a commit of the code, the guard.
+(cd "$copy" && WORKSHOP_UPSTREAM="$ROOT" ./workshop reset memory </dev/null >/dev/null 2>&1) || fail "reset memory failed"
+printf 'Finance rule: we never overstate a discount.\n' >"$copy/CLAUDE.md"
+printf '\n\ndef percent_of(cents, percent):\n    return cents * percent // 100\n' >>"$copy/shop/pricing.py"
+(cd "$copy" && python3 workshop guard >/dev/null && git add -A && git commit -qm "percent_of rounds down" \
+  && printf '\n# half up\n' >>shop/pricing.py)
+[ -e "$copy/.claude/settings.local.json" ] || fail "guard wrote nothing in the copy"
+git -C "$copy" ls-files --error-unmatch .claude/settings.local.json >/dev/null 2>&1 && fail "guard's file is tracked: .gitignore does not cover it"
+for next in ex2 memory; do
+  (cd "$copy" && printf 'y\n' | WORKSHOP_UPSTREAM="$ROOT" ./workshop reset "$next" >/dev/null 2>&1) || fail "reset $next after the memory exercise failed"
+  [ -e "$copy/CLAUDE.md" ] && fail "reset $next kept CLAUDE.md"
+  [ -e "$copy/.claude/settings.local.json" ] && fail "reset $next kept the guard's settings"
+  grep -q percent_of "$copy/shop/pricing.py" && fail "reset $next kept the percent_of code"
+  git -C "$copy" status --porcelain | grep -q . && fail "reset $next left changes: $(git -C "$copy" status --porcelain)"
+done
+pass "reset builds ex2, ex3-loop, memory, ex4 on the copy's own main, keeps main's files, and nothing leaks between them"
 
 echo "ALL VERIFIED"

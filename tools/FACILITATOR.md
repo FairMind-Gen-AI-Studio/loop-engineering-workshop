@@ -8,7 +8,7 @@ verify them. The deck, its speaker notes and the timing live with the deck, not 
 
 | Branch | Built from | For |
 |---|---|---|
-| `main` | by hand | exercises 1 and 5, and the base of every other branch |
+| `main` | by hand | exercises 1, 5 and memory, and the base of every other branch |
 | `ex2-start` | main + `overlays/ex2-start` | a VAT rounding bug that turns CI red |
 | `ex3-goal-start` | main + `overlays/ex3-goal-start` | `TICKET.md` only, for the `/goal` run |
 | `ex3-loop-start` | main + both ex3 overlays | the ticket plus the prepared `.fairmind/` contract |
@@ -50,11 +50,37 @@ old `workshop`. `verify.sh` fails on exactly that ("rolls main's files back").
   has no reason to satisfy. `module-exists` passes before any work and is quarantined
   by admission; no criterion points at it, so arming still succeeds. The exercise ends
   at the first green evaluation (`confirmation 1/3`).
+- **Memory.** Percentages round down to the cent ("Finance rule: we never overstate a
+  discount"); `shop/tax.py` rounds half up, so no code reveals the rule. Without
+  `CLAUDE.md` a new headless run prints `300` for `percent_of(1999, 15)`; with it, `299`.
+  The point is what a fresh process starts with: the files it reads. Step 4 shows that
+  a prompt outranks `CLAUDE.md`, because both are context. Step 5 shows the one thing
+  that does not depend on the model, a `Stop` hook (`./workshop guard`, running
+  `scripts/check_percent.py`). Claude Code ends the turn anyway after nine refusals in
+  a row, so the hook is a limit on a turn, not a guarantee; say so. In step 4 Claude may
+  edit `scripts/check_percent.py`; step 5 begins with `git restore .` for that reason.
+  Step 6 is the bridge to the at-home exercises: a cloud run has what is in the clone.
+  `reset` removes `CLAUDE.md`, the guard's settings and the code.
 - **Ex 4.** `shipping_for` uses `>` where the docstring says "50.00 EUR or more", and
   the receipt still prints the full shipping fee on a free order. The shipped tests
   cover neither; `solutions/ex4/tests/test_shipping.py` catches both.
 - **Ex 5.** No code. The discussion is the merge policy, and the solo-copy trap in
   `kit/ex5/merge-policy.md`: GitHub cannot tell a routine from its owner.
+
+## The two-hour run
+
+| Minutes | Exercise | Where |
+|---|---|---|
+| 0-10 | 1 · watch the loop | room |
+| 10-25 | 2 · put a clock on it | room |
+| 25-40 | 3, run 1 · `/goal`, and the question at the end of the core path | room |
+| 40-52 | memory · what the next run knows | room |
+| 52-120 | discussion, questions, and the advanced track for whoever is ready: 3, run 2 and Compare | room |
+| after | 4 and 5 | home |
+
+The core needs no plugin, GitHub App or review secret. Exercise 3 run 2 needs the
+plugin; exercises 4 and 5 need the rest of README's at-home setup. `./workshop doctor`
+lists those lines as not needed yet, so the room sees no ✗ for them.
 
 ## Windows
 
