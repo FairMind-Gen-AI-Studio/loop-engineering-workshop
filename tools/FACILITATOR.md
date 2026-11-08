@@ -60,28 +60,13 @@ old `workshop`. `verify.sh` fails on exactly that ("rolls main's files back").
   with no memory file at all. The variant, with the step 4 prompt, shows the limit:
   Claude Code lets go after several refusals in a row, so a hook limits a turn and
   cannot out-vote the person; that is what CODEOWNERS and branch rules are for.
-  Step 6 is the bridge to the at-home exercises: a cloud run has what is in the clone.
+  Step 6 is the bridge to exercise 5: a cloud run has what is in the clone.
   `reset` removes `CLAUDE.md`, the guard's settings and the code.
 - **Ex 4.** `shipping_for` uses `>` where the docstring says "50.00 EUR or more", and
   the receipt still prints the full shipping fee on a free order. The shipped tests
   cover neither; `solutions/ex4/tests/test_shipping.py` catches both.
 - **Ex 5.** No code. The discussion is the merge policy, and the solo-copy trap in
   `kit/ex5/merge-policy.md`: GitHub cannot tell a routine from its owner.
-
-## The two-hour run
-
-| Minutes | Exercise | Where |
-|---|---|---|
-| 0-10 | 1 · watch the loop | room |
-| 10-25 | 2 · put a clock on it | room |
-| 25-40 | 3, run 1 · `/goal`, and the question at the end of the core path | room |
-| 40-52 | memory · what the next run knows | room |
-| 52-120 | discussion, questions, and the advanced track for whoever is ready: 3, run 2 and Compare | room |
-| after | 4 and 5 | home |
-
-The core needs no plugin, GitHub App or review secret. Exercise 3 run 2 needs the
-plugin; exercises 4 and 5 need the rest of README's at-home setup. `./workshop doctor`
-lists those lines as not needed yet, so the room sees no ✗ for them.
 
 ## Windows
 
