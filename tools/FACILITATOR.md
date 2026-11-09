@@ -44,7 +44,7 @@ old `workshop`. `verify.sh` fails on exactly that ("rolls main's files back").
   trusted, which README's setup and `doctor` cover.
 - **Ex 2.** `shop/tax.py` truncates instead of rounding half up: `test_vat_rounds_half_up`
   fails. CI waits 100 s in a step that says it checks nothing, so a `/loop` has
-  something to wait for. `./workshop deploy` regresses at minute 7 for 3 minutes.
+  something to wait for. `./workshop deploy` regresses at minute 3 for 2.5 minutes.
 - **Ex 3.** The ticket never says what `FREE100` takes 100% off. The brief does: items
   only, shipping still charged. `ac4-free-keeps-shipping` is the check `/goal` usually
   has no reason to satisfy. `module-exists` passes before any work and is quarantined
