@@ -10,6 +10,9 @@ reply.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+**Keep a note**, outside this folder, of anything that breaks or surprises you:
+exercise 5 starts from that list.
+
 ## Before you start
 
 The review runs on GitHub, on your copy, so it cannot use the Claude login on your

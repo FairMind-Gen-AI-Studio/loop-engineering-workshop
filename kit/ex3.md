@@ -9,6 +9,9 @@ compare what each one accepted as done.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+**Keep a note**, outside this folder, of anything that breaks or surprises you:
+exercise 5 starts from that list.
+
 ## Run 1 · `/goal`
 
 ```bash

@@ -21,8 +21,8 @@ claude
 
 ### 1 · File two defects you hit today
 
-Pick two things that broke or surprised you in exercises 1 to 4. For each one, paste
-this and replace the first line:
+Pick two things that broke or surprised you in exercises 1 to 4, from the notes you
+kept. For each one, paste this and replace the first line:
 
 ```text
 Defect: <one line: what broke, e.g. "the /loop kept firing after CI was green">
@@ -30,8 +30,9 @@ Defect: <one line: what broke, e.g. "the /loop kept firing after CI was green">
 File it as a GitHub issue in this repository, following the Defect template in
 .github/ISSUE_TEMPLATE/defect.yml:
 1. Derive the key <repo>:<path/to/file>::<symbol>:<shape> from WHAT BROKE, not from
-   my wording. The shape comes from the closed list in kit/ex5/failure-shapes.md.
-   For a skill, prompt or workflow, the symbol is the section heading.
+   my wording. <repo> is what gh repo view --json name -q .name prints. The shape
+   comes from the closed list in kit/ex5/failure-shapes.md. For a skill, prompt or
+   workflow, the symbol is the section heading.
 2. Before creating anything, search every issue, open and closed:
    gh issue list --state all --search "<key> in:body"
    If one exists, comment on it with the new evidence instead, and stop there.
