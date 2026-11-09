@@ -44,7 +44,9 @@ alongside someone on macOS or Linux.
 Do this the day before.
 
 1. **Make your own copy.** On GitHub, **Use this template → Create a new repository**,
-   in your own account. Then clone your copy and `cd` into it.
+   in your own account. Do not fork this repository and do not clone it directly:
+   your pushes, and the GitHub Actions they start, belong on your copy. Then clone
+   your copy and `cd` into it.
 2. **Install the tools:** [Claude Code](https://claude.com/claude-code),
    [GitHub CLI](https://cli.github.com) then `gh auth login`, git, Python 3.10 or
    later, and `python3 -m pip install pytest`. On Windows, in PowerShell:
