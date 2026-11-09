@@ -61,8 +61,8 @@ What scheduled tasks do I have? Cancel the CI status one.
 
 ## Loop B · a fix going to production
 
-**Terminal 2:** start the fake production log. It writes one line a minute, and a
-regression comes later. Leave this terminal running.
+**Terminal 2:** start the fake production log. It writes four lines a minute, and a
+regression comes after a few minutes. Leave this terminal running.
 
 ```bash
 ./workshop deploy
@@ -75,19 +75,19 @@ claude
 ```
 
 ```text
-/loop Watch deploy.log: a fix just went to production, and the log gets one line per
-minute. Each iteration, read only the lines added since the previous one.
+/loop Watch deploy.log: a fix just went to production, and the log gets four lines
+per minute. Each iteration, read only the lines added since the previous one.
 - Every new line says status=ok: say "quiet", then wait longer than last time before
-  the next check: 1 minute, then 2, then 5, then stay at 5.
+  the next check: 1 minute, then 2, then 3, then stay at 3.
 - Any new line says status=degraded: tell me the minute and the error_rate, and go
   back to checking every minute.
-- Once the log has reached minute=20: summarise what you saw and stop the loop.
+- Once the log has reached minute=8: summarise what you saw and stop the loop.
 ```
 
 In the room, minutes stand in for hours.
 
 **Expect:** the waits get longer while the log is quiet, drop back to one minute
-around `minute=7`, and get longer again once the regression is over.
+soon after `minute=3`, and get longer again once the regression is over.
 
 ### Variant · a clock with no judgement
 
