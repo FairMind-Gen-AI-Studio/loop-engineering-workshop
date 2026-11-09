@@ -11,6 +11,21 @@ what only a hook can enforce.
 > says `./workshop`, and `py` where it says `python3`. **Prompts** go inside Claude
 > Code and are the same everywhere.
 
+## Before you start
+
+Auto memory is on by default, but a setting can turn it off. Check it:
+
+```bash
+claude
+```
+
+```text
+/memory
+```
+
+**Expect:** the auto memory toggle reads on. If it does not, turn it on there. Then
+leave with `/exit`.
+
 ## The rule
 
 Finance says: **we never overstate a discount.** A percentage of an amount rounds
