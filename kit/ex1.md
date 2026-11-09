@@ -10,6 +10,9 @@ you count those turns, then make the harness record them for you.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+**Keep a note**, outside this folder, of anything that breaks or surprises you:
+exercise 5 starts from that list.
+
 ## The task
 
 `python3 -m shop` prints a receipt with amounts like `24.5 EUR`. Money should always

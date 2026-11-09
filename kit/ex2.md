@@ -14,6 +14,9 @@ most of its life waiting.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+**Keep a note**, outside this folder, of anything that breaks or surprises you:
+exercise 5 starts from that list.
+
 ## Loop A · watch a pipeline until it is green
 
 This branch has a bug that makes CI fail. The pipeline takes about two minutes.
