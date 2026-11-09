@@ -44,15 +44,17 @@ Show me the finished file.
 ```
 
 Read what it wrote. It is your skill now: change anything you would do differently.
-Then commit it and leave Claude Code:
+Then leave Claude Code:
+
+```text
+/exit
+```
+
+And commit it, in your terminal:
 
 ```bash
 git add .claude/skills/review-loop/SKILL.md
 git commit -m "review-loop skill"
-```
-
-```text
-/exit
 ```
 
 ### 2 · Open a PR and let the skill run the loop

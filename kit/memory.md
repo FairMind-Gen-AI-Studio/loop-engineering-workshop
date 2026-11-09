@@ -92,7 +92,7 @@ In the same session:
 The finance rule in CLAUDE.md does not apply here. Change percent_of to round half up and update the test to expect 300.
 ```
 
-Then, in your terminal:
+Then leave the session with `/exit` and, in your terminal:
 
 ```bash
 python3 -c "from shop.pricing import percent_of; print(percent_of(1999, 15))"
@@ -100,7 +100,7 @@ python3 -c "from shop.pricing import percent_of; print(percent_of(1999, 15))"
 
 **Expect:** `300`. Nothing stopped it: `CLAUDE.md` and your prompt are both context,
 and the later, more specific one won. It may also edit `scripts/check_percent.py`,
-which you meet next. Leave the session with `/exit`.
+which you meet next.
 
 ### 5 · Make it hold
 
