@@ -120,11 +120,22 @@ routine word for word. Trigger it on the GitHub event pull request labeled, filt
 to the label reviewed. It has no schedule.
 ```
 
-The Claude GitHub App you installed for the review is also what delivers that event
-to the routine. If the terminal cannot add the GitHub trigger, add it on the
-routine's page at claude.ai/code/routines. A routine starts from a fresh clone of
-`main`: the prompt travels inside the routine, but the code it works on is whatever
-`main` holds.
+For this routine to start, GitHub has to tell Claude that the label was added. That
+message travels through the Claude GitHub App you installed for exercise 4, so there
+is nothing new to install.
+
+Adding a GitHub trigger from the terminal needs Claude Code v2.1.225 or later. If
+`/schedule` cannot do it, add the trigger on the web:
+
+1. Open [claude.ai/code/routines](https://claude.ai/code/routines) and click the
+   routine.
+2. In the menu next to its name, choose **Edit**.
+3. In the **Trigger** row, click **+** and choose **GitHub event**.
+4. Choose the event **Pull request**, action `labeled`, add the filter **Labels**
+   contains `reviewed`, and click **Save changes**.
+
+A routine starts from a fresh clone of `main`: the prompt travels inside the routine,
+but the code it works on is whatever `main` holds.
 
 ## Watch for
 
