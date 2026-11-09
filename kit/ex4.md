@@ -10,6 +10,40 @@ reply.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+## Before you start
+
+The review runs on GitHub, on your copy, so it cannot use the Claude login on your
+laptop. It needs two things, once per copy:
+
+1. **The app.** Install the [Claude GitHub App](https://github.com/apps/claude) and give
+   it access to your copy: the review posts through it.
+2. **A credential**, stored as a secret on your copy. Choose **one**.
+
+   With the **API key** you were given (paste it when asked):
+
+   ```bash
+   gh secret set ANTHROPIC_API_KEY
+   ```
+
+   Or with a **Claude subscription** (Pro, Max, Team or Enterprise):
+
+   ```bash
+   claude setup-token                      # prints a long-lived token: copy it
+   gh secret set CLAUDE_CODE_OAUTH_TOKEN   # paste it when asked
+   ```
+
+Then check it:
+
+```bash
+./workshop doctor
+```
+
+**Expect:** a `✓` on the `review secret` line. The app `doctor` cannot see, so check
+that one by hand on GitHub.
+
+If you opened the pull request before storing the secret, its review failed with
+`No review credential`: open the failed run on GitHub and choose **Re-run all jobs**.
+
 ## Steps
 
 ### 1 · Fill in the skill

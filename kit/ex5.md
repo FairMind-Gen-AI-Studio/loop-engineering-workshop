@@ -9,6 +9,9 @@ first two steps and write the third one down.
 > **Commands** go in your terminal; on Windows type `py workshop` wherever this page
 > says `./workshop`. **Prompts** go inside Claude Code and are the same everywhere.
 
+**Before you start:** the steps in README under "Only for exercises 4 and 5", including
+`./workshop setup`, which creates the `defect` label step 1 needs.
+
 ```bash
 ./workshop reset ex5
 claude
