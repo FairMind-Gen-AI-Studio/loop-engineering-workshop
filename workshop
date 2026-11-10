@@ -136,6 +136,11 @@ def setup():
     owners = ROOT / ".github" / "CODEOWNERS"
     text = owners.read_text()
     if "@OWNER" in text:
+        # The commit is pushed as HEAD: from an exercise branch it would miss main.
+        current = run("git", "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        if current != "main":
+            sys.exit(f"setup commits CODEOWNERS to main, and you are on {current}: "
+                     "run `git switch main`, then ./workshop setup again")
         owners.write_text(text.replace("@OWNER", f"@{user}"))
         run("git", "add", str(owners))
         run("git", "commit", "-m", f"CODEOWNERS: @{user} owns the paths that stay human")
