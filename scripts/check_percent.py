@@ -14,7 +14,12 @@ sys.path.insert(0, str(ROOT))
 
 
 def main():
-    from shop import pricing
+    try:
+        from shop import pricing
+    except Exception as err:
+        # Exit 1 would let the turn end; a broken module must block like a wrong value.
+        print(f"shop.pricing cannot be imported: {err!r}. Fix it before ending the turn.", file=sys.stderr)
+        return 2
 
     percent_of = getattr(pricing, "percent_of", None)
     if percent_of is None:
