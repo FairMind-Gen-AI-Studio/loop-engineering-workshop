@@ -139,7 +139,6 @@ your own `main`, so the pull requests you open go to your copy.
 | `.github/ISSUE_TEMPLATE/defect.yml` | a defect with a stable key and a Reproduce block |
 | `.github/CODEOWNERS`, `.github/rulesets/main.json` | the paths that stay human, and what GitHub enforces |
 | `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
-| `.claude/settings.json` | the commands the exercises may run without asking: tests, `git`, and the `gh` verbs that read or comment. Merging and raw API calls still ask |
 | `.claude/skills/review-loop/` | the skill you write in exercise 4 |
 | `scripts/fake_deploy.py` | the fake production log for exercise 2 |
 | `scripts/check_percent.py` | the check the Stop hook runs in the memory exercise |
@@ -150,9 +149,6 @@ your own `main`, so the pull requests you open go to your copy.
 | Symptom | Cause and fix |
 |---|---|
 | `./workshop doctor` shows ✗ | the line after the arrow says what to install or run; `·` lines are for later |
-| Claude asks permission for every test or `git` command | the folder is not trusted: run `claude` there once and answer yes |
-| `./workshop` does nothing on Windows | type `py workshop …` instead |
-| `claude` says Git Bash was not found (Windows) | install Git for Windows, then open a new terminal |
 | Claude asks permission for every test or `git` command | the folder is not trusted: run `claude` there once and answer yes |
 | `./workshop` does nothing on Windows | type `py workshop …` instead |
 | `claude` says Git Bash was not found (Windows) | install Git for Windows, then open a new terminal |
