@@ -92,18 +92,60 @@ In the room, minutes stand in for hours.
 **Expect:** the waits get longer while the log is quiet, drop back to one minute
 soon after `minute=3`, and get longer again once the regression is over.
 
-### Variant · a clock with no judgement
+### Variant · let the log tell you
 
-```text
-/loop 1m Read the last line of deploy.log and tell me the status.
+Loop B goes back to the log to ask whether anything changed. The Monitor tool turns
+that around: Claude writes a small script, runs it in the background, and each line
+the script prints reaches the session as it is written. You keep working, and Claude
+interjects when one arrives. On Windows, Monitor needs Git Bash.
+
+Once Loop B has stopped, start a second log, three times faster: twelve minutes of log
+in four.
+
+**Terminal 2:**
+
+```bash
+./workshop deploy --out monitor.log --interval 5
 ```
 
-Count how many answers in a row are identical. Then cancel it as in Loop A.
+**Terminal 3**, straight away:
+
+```text
+Use the Monitor tool, not /loop, to watch monitor.log. Tell me each time a new line
+says status=degraded, with its minute and error_rate. When the log reaches
+minute=11.75, summarise what you saw and stop watching.
+```
+
+**Expect:** ten notifications, `minute=3` to `minute=5.25`, each a few seconds after
+its line was written, and nothing in between: no prompt runs while the log is quiet.
+Loop B found the same regression up to a minute late.
+
+Then look at what Claude wrote:
+
+```text
+Show me the exact command your monitor runs.
+```
+
+If it matches only `status=degraded`, the line `minute=11.75` never reaches Claude:
+the log ends and the monitor stays silent until its deadline (5 minutes unless Claude
+set a longer one), exactly as it would while waiting for more.
+
+**Break it.** Ask Claude to start the same watch again, then run the deploy command
+again and press `Ctrl-C` in terminal 2 at about `minute=4`. The log stops in the
+middle of the regression. What does the monitor say? Then:
+
+```text
+Re-arm the monitor so it also tells me when monitor.log has not grown for 30 seconds.
+```
 
 ## Watch for
 
 - The forgotten stop: the loop keeps firing after the pipeline is green, and every
   iteration is paid for.
 - The interval: one minute feels responsive and mostly buys identical answers.
+- Silence is not success: a monitor that matches only the line you hope for stays quiet
+  through a crash, and quiet looks exactly like still running.
+- Monitor may have shown up in Loop B already: when you give `/loop` no interval,
+  Claude may use Monitor instead of re-running the prompt.
 - These loops die with your session. Which of these watches should have been a
   routine (`/schedule`), which keeps running with the laptop closed?

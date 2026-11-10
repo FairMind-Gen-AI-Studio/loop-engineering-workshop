@@ -38,7 +38,7 @@ EXERCISES = {
     "ex5": "main",
 }
 # Files an exercise writes that a reset must not carry into the next one.
-SCRATCH = [".fairmind/active-context.json", ".claude/settings.local.json", "deploy.log", "run.jsonl", "tool-log.txt", "CLAUDE.md"]
+SCRATCH = [".fairmind/active-context.json", ".claude/settings.local.json", "deploy.log", "monitor.log", "run.jsonl", "tool-log.txt", "CLAUDE.md"]
 LABELS = {
     "reviewed": ("0E8A16", "The Claude review has run on the latest push"),
     "defect": ("D73A4A", "Found while using our own tools"),
