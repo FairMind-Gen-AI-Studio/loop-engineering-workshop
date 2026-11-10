@@ -169,8 +169,9 @@ def reset(exercise):
             return 1
     # A copy made from a template starts a new git history, so the template's
     # branches share no commit with your main and a pull request from one would be
-    # refused. Instead, replay the difference between the template's main and the
-    # exercise branch on top of your own main.
+    # refused. Instead, replay what the exercise branch adds on top of your own main.
+    # Three dots: diff from where the branch left the template's main, so commits
+    # main gained after the branch was built are not reverted.
     run("git", "fetch", "--quiet", "origin", "main")
     run("git", "fetch", "--quiet", UPSTREAM, f"+main:refs/workshop/main", f"+{branch}:refs/workshop/{branch}")
     local = f"{exercise}-work"
@@ -178,7 +179,7 @@ def reset(exercise):
     for scratch in SCRATCH:
         (ROOT / scratch).unlink(missing_ok=True)
     if branch != "main":
-        patch = run("git", "diff", "--binary", "refs/workshop/main", f"refs/workshop/{branch}").stdout
+        patch = run("git", "diff", "--binary", f"refs/workshop/main...refs/workshop/{branch}").stdout
         applied = subprocess.run(["git", "apply", "--3way", "--index"], cwd=ROOT, input=patch, text=True,
                                  capture_output=True)
         if applied.returncode != 0:
